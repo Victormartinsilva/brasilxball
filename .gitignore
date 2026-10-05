@@ -1,0 +1,13 @@
+# Godot
+.godot/
+*.import
+export_credentials.cfg
+# Builds
+build/*
+!build/.gdignore
+site/play/
+# OS
+.DS_Store
+Thumbs.db
+# Vercel
+.vercel

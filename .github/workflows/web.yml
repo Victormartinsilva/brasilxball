@@ -1,0 +1,94 @@
+name: Web build (Godot → Vercel)
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.3"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot
+            ~/.local/share/godot/export_templates
+          key: godot-${{ env.GODOT_VERSION }}-web
+
+      - name: Baixar Godot + templates web
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          cd ~/godot
+          curl -sSL -o godot.zip https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip
+          unzip -q godot.zip && mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 godot && rm godot.zip
+          curl -sSL -o tpl.tpz https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+          unzip -q tpl.tpz 'templates/web_nothreads_release.zip' 'templates/web_release.zip' 'templates/version.txt'
+          mv templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
+          rm -rf tpl.tpz templates
+
+      - name: Importar projeto
+        run: ~/godot/godot --headless --editor --quit 2>&1 | tee import.log; ! grep -q "SCRIPT ERROR\|Parse Error" import.log
+
+      - name: Autoteste — uma run completa por personagem
+        run: |
+          for c in guardiao cacadora alquimista; do
+            ~/godot/godot --headless --fixed-fps 60 -- --autotest $c 420 > run_$c.log 2>&1 || true
+            grep -E "AUTOTEST_(RESULT|TIMEOUT)" run_$c.log
+            if grep -q "SCRIPT ERROR" run_$c.log; then grep -A3 "SCRIPT ERROR" run_$c.log | head -40; exit 1; fi
+            grep -q "AUTOTEST_" run_$c.log || { tail -40 run_$c.log; exit 1; }
+          done
+
+      - name: Exportar para Web
+        run: |
+          mkdir -p build/web
+          ~/godot/godot --headless --export-release "Web" build/web/index.html
+          rm -rf site/play && mkdir -p site/play && cp -r build/web/* site/play/
+          ls -la site/play
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: site
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: site
+
+      # Opção A (sem secrets): publica o site pronto na branch deploy-web.
+      # Na Vercel: importe o repositório e defina Production Branch = deploy-web,
+      # Framework = Other, sem build command, Output Directory = "." (raiz).
+      - name: Publicar na branch deploy-web
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: deploy-web
+          publish_dir: ./site
+          force_orphan: true
+          commit_message: "deploy: ${{ github.sha }}"
+
+      # Opção B (com secrets VERCEL_TOKEN / VERCEL_ORG_ID / VERCEL_PROJECT_ID).
+      - name: Deploy direto na Vercel (opcional)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        if: env.VERCEL_TOKEN != ''
+        run: npx --yes vercel@latest deploy site --prod --yes --token="$VERCEL_TOKEN"

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ball x Brasil</title>
+  <meta name="description" content="Roguelite brasileiro de ação onde bolas mágicas atravessam cidades, florestas e paisagens do Brasil.">
+  <link rel="icon" href="play/index.icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #14110d; --wood: #3b2416; --wood2: #5a3a22; --gold: #e8b04a; --cream: #f3e3c3;
+      --red: #c2412d; --teal: #3fb8a5; --ink: #120d08; --muted: #a89a86; --green: #2f7a4a;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--cream); font: 17px/1.55 Nunito, system-ui, sans-serif; }
+    a { color: var(--gold); }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+    header.hero {
+      position: relative; min-height: 88vh; display: grid; align-items: center;
+      background: linear-gradient(90deg, rgba(20,17,13,.95) 0%, rgba(20,17,13,.75) 45%, rgba(20,17,13,.2) 100%), url(img/run.jpg) center/cover;
+      border-bottom: 3px solid var(--ink);
+    }
+    h1 { font: 400 clamp(56px, 10vw, 120px)/.9 "Lilita One", sans-serif; margin: 0; color: var(--gold);
+         text-shadow: 4px 4px 0 var(--ink), -2px -2px 0 var(--ink), 2px -2px 0 var(--ink), -2px 2px 0 var(--ink); }
+    h1 span { display: block; color: var(--cream); font-size: .62em; }
+    .tag { font-size: clamp(18px, 2.4vw, 24px); font-weight: 800; margin: 18px 0 28px; max-width: 560px; }
+    .btn { display: inline-block; padding: 16px 34px; background: var(--wood); color: var(--cream); text-decoration: none;
+           border: 3px solid var(--gold); border-radius: 10px; font: 400 26px "Lilita One", sans-serif; letter-spacing: .5px;
+           box-shadow: 0 6px 0 var(--ink); transition: transform .1s, background .1s; }
+    .btn:hover { background: var(--wood2); transform: translateY(-2px); }
+    .btn.ghost { border-color: var(--muted); font-size: 18px; padding: 12px 22px; margin-left: 10px; }
+    .note { color: var(--muted); font-size: 14px; margin-top: 14px; }
+    section { padding: 64px 0; border-bottom: 1px solid #2a2016; }
+    h2 { font: 400 clamp(32px, 4vw, 44px) "Lilita One", sans-serif; color: var(--gold); margin: 0 0 18px; text-shadow: 3px 3px 0 var(--ink); }
+    .grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .card { background: #1f1812; border: 2px solid #4a3522; border-radius: 12px; padding: 18px; }
+    .card h3 { margin: 0 0 6px; font: 400 24px "Lilita One", sans-serif; color: var(--cream); }
+    .card .k { color: var(--muted); font-size: 14px; }
+    .card b { color: var(--gold); }
+    .pill { display: inline-block; font-size: 12px; font-weight: 800; padding: 2px 10px; border-radius: 99px; background: var(--ink); color: var(--teal); margin: 0 6px 6px 0; }
+    .shots { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    .shots img { width: 100%; border-radius: 10px; border: 3px solid var(--ink); box-shadow: 0 8px 0 rgba(0,0,0,.35); display: block; }
+    .shots figcaption { color: var(--muted); font-size: 14px; margin-top: 6px; }
+    .regions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .region { padding: 10px 16px; border-radius: 10px; background: #1f1812; border: 2px solid #3a2a1a; }
+    .region.on { border-color: var(--gold); color: var(--gold); font-weight: 800; }
+    kbd { background: var(--ink); border: 1px solid #4a3522; border-bottom-width: 3px; border-radius: 6px; padding: 1px 7px; font-size: 14px; }
+    footer { padding: 32px 0 48px; color: var(--muted); font-size: 14px; }
+    @media (max-width: 640px) {
+      header.hero { background: linear-gradient(180deg, rgba(20,17,13,.6), rgba(20,17,13,.95)), url(img/run.jpg) center/cover; }
+      .btn.ghost { margin: 12px 0 0; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <h1>BALL<span>x BRASIL</span></h1>
+      <p class="tag">Um roguelite brasileiro de ação onde bolas mágicas atravessam cidades, florestas e paisagens do Brasil — enquanto você cria builds absurdas a cada partida.</p>
+      <a class="btn" href="play/">JOGAR NO NAVEGADOR</a>
+      <a class="btn ghost" href="#como-jogar">Como jogar</a>
+      <p class="note">Protótipo v0.1 · Vertical slice: Avenida Paulista · Melhor no PC (funciona no celular)</p>
+    </div>
+  </header>
+
+  <section>
+    <div class="wrap">
+      <h2>Quebre. Ricocheteie. Evolua.</h2>
+      <div class="grid">
+        <div class="card"><h3>Física divertida</h3><p>Bolas ricocheteiam nas paredes, nos inimigos e até nos ônibus da Paulista. Combos, explosões e destruição em cadeia.</p></div>
+        <div class="card"><h3>Builds absurdas</h3><p>12 bolas, 4 fusões, 15 passivas e 7 relíquias. Fogo + Gelo vira <b>Termodinâmica</b>. Veneno + Raio vira <b>Neurotóxica</b>.</p></div>
+        <div class="card"><h3>Runs curtas</h3><p>Ondas, Feira da Paulista, elites e o chefe <b>O Arranha-Céu</b> — um prédio vivo cujas janelas acesas são o ponto fraco.</p></div>
+        <div class="card"><h3>Brasil fantástico</h3><p>Pombos mecânicos, Robôs Zona Azul, Fuscas corrompidos e Golens de concreto. Um Brasil em miniatura, vivo, 2.5D.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Escolha seu personagem</h2>
+      <div class="grid">
+        <div class="card"><h3>Guardião</h3><span class="pill">DEFESA</span><span class="pill">BOLAS PESADAS</span>
+          <p><b>Muralha:</b> quanto mais a bola fica em campo, mais dano.<br><b>Impacto:</b> bolas que voltam ao chão disparam ondas de choque.</p></div>
+        <div class="card"><h3>Caçadora</h3><span class="pill">VELOCIDADE</span><span class="pill">CRÍTICO</span>
+          <p><b>Caçada:</b> cada abate aumenta o crítico enquanto o combo durar.<br><b>Rajada:</b> leque de 14 bolas pequenas.</p></div>
+        <div class="card"><h3>Alquimista</h3><span class="pill">ELEMENTOS</span><span class="pill">REAÇÕES</span>
+          <p><b>Reação:</b> elementos diferentes no mesmo inimigo explodem em Vapor, Plasma, Sobrecarga…<br><b>Catalisador:</b> reações garantidas.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Do protótipo</h2>
+      <div class="shots">
+        <figure><img src="img/run.jpg" alt="Run na Avenida Paulista com bolas de fogo e combo" loading="lazy"><figcaption>Avenida Paulista em diorama: combo, queimaduras e gemas de XP.</figcaption></figure>
+        <figure><img src="img/chefe.jpg" alt="Luta contra o chefe O Arranha-Céu" loading="lazy"><figcaption>O Arranha-Céu: acerte as janelas acesas.</figcaption></figure>
+        <figure><img src="img/levelup.jpg" alt="Tela de subir de nível com três cartas" loading="lazy"><figcaption>Escolha 1 de 3: bolas, passivas, fusões.</figcaption></figure>
+        <figure><img src="img/acampamento.jpg" alt="Acampamento com mapa do Brasil e personagens" loading="lazy"><figcaption>Acampamento: mapa do Brasil, Oficina, Laboratório, Arsenal, Relicário.</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="como-jogar">
+    <div class="wrap">
+      <h2>Como jogar</h2>
+      <div class="grid">
+        <div class="card"><p><kbd>A</kbd> <kbd>D</kbd> ou setas: mover<br>Mouse: mirar · clique e segure: andar até o cursor<br><kbd>Espaço</kbd> / botão direito: habilidade</p></div>
+        <div class="card"><p><kbd>T</kbd>: mira automática · <kbd>Tab</kbd>: velocidade<br><kbd>1</kbd>–<kbd>4</kbd>: escolher upgrade · <kbd>Esc</kbd>: pausa<br>Celular: toque e arraste para mover e mirar.</p></div>
+        <div class="card"><p>Não deixe os inimigos chegarem à faixa de pedestres. Duas bolas no nível 3 podem se <b>fundir</b>. Morreu? Você leva 60% da sucata para o Acampamento.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>Mapa do Brasil</h2>
+      <div class="regions">
+        <span class="region on">São Paulo — jogável</span>
+        <span class="region">Rio de Janeiro</span><span class="region">Cataratas do Iguaçu</span><span class="region">Minas Gerais</span>
+        <span class="region">Pantanal</span><span class="region">Nordeste</span><span class="region">Amazônia</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">Ball x Brasil · feito com Godot 4 · hospedado na Vercel · código e GDD no GitHub.</div>
+  </footer>
+</body>
+</html>

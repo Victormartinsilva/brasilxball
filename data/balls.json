@@ -1,0 +1,178 @@
+[
+  {
+    "id": "pedra",
+    "nome": "Bola de Pedra",
+    "descricao": "A bola básica. Dano médio, velocidade média, comportamento previsível.",
+    "raridade": "comum",
+    "dano": 10, "velocidade": 16, "tamanho": 1.0, "ricochetes": 6, "piercing": 0,
+    "quantidade": 1, "cooldown": 0.85, "critico": 0.05,
+    "elementos": [], "comportamento": "basico",
+    "tags": ["fisica", "ricochete"],
+    "cor": "#c9b79c", "inicial": true, "custo": 0
+  },
+  {
+    "id": "ferro",
+    "nome": "Bola de Ferro",
+    "descricao": "Pesada. Alto dano, poucos ricochetes. Atravessa inimigos que ela mata.",
+    "raridade": "comum",
+    "dano": 24, "velocidade": 11, "tamanho": 1.3, "ricochetes": 3, "piercing": 0,
+    "quantidade": 1, "cooldown": 1.5, "critico": 0.03,
+    "elementos": [], "comportamento": "pesada",
+    "tags": ["fisica", "pesada"],
+    "cor": "#7d8a96", "inicial": true, "custo": 0
+  },
+  {
+    "id": "brasa",
+    "nome": "Brasa",
+    "descricao": "Aplica queimadura. Inimigo queimado que morre cria uma pequena área de fogo.",
+    "raridade": "incomum",
+    "dano": 8, "velocidade": 15, "tamanho": 1.0, "ricochetes": 5, "piercing": 0,
+    "quantidade": 1, "cooldown": 0.95, "critico": 0.05,
+    "elementos": ["fogo"], "comportamento": "basico",
+    "tags": ["elemental", "fogo", "area", "dot"],
+    "cor": "#ff7a1f", "inicial": true, "custo": 0
+  },
+  {
+    "id": "glacial",
+    "nome": "Glacial",
+    "descricao": "Reduz a velocidade dos inimigos. Três acertos seguidos congelam o alvo.",
+    "raridade": "incomum",
+    "dano": 7, "velocidade": 14, "tamanho": 1.0, "ricochetes": 5, "piercing": 0,
+    "quantidade": 1, "cooldown": 0.95, "critico": 0.05,
+    "elementos": ["gelo"], "comportamento": "basico",
+    "tags": ["elemental", "gelo", "controle"],
+    "cor": "#7fe3ff", "inicial": true, "custo": 0
+  },
+  {
+    "id": "arco",
+    "nome": "Arco",
+    "descricao": "Elétrica. Ao acertar, salta para inimigos próximos (1 → 2 → 4 → 8 alvos).",
+    "raridade": "rara",
+    "dano": 7, "velocidade": 18, "tamanho": 0.9, "ricochetes": 5, "piercing": 0,
+    "quantidade": 1, "cooldown": 1.0, "critico": 0.06,
+    "elementos": ["raio"], "comportamento": "basico",
+    "tags": ["elemental", "raio", "rapida"],
+    "cor": "#ffe14a", "inicial": true, "custo": 0
+  },
+  {
+    "id": "bumerangue",
+    "nome": "Bumerangue",
+    "descricao": "Ao atingir o topo da arena, volta direto para você atravessando tudo no caminho.",
+    "raridade": "incomum",
+    "dano": 9, "velocidade": 17, "tamanho": 1.0, "ricochetes": 4, "piercing": 1,
+    "quantidade": 1, "cooldown": 0.9, "critico": 0.1,
+    "elementos": [], "comportamento": "bumerangue",
+    "tags": ["fisica", "critico", "piercing"],
+    "cor": "#d9a35a", "inicial": true, "custo": 0
+  },
+  {
+    "id": "peste",
+    "nome": "Peste",
+    "descricao": "Veneno acumulativo. Quando o inimigo morre, o veneno se espalha.",
+    "raridade": "incomum",
+    "dano": 6, "velocidade": 14, "tamanho": 1.0, "ricochetes": 6, "piercing": 0,
+    "quantidade": 1, "cooldown": 0.9, "critico": 0.04,
+    "elementos": ["veneno"], "comportamento": "basico",
+    "tags": ["elemental", "veneno", "dot"],
+    "cor": "#7bd94a", "inicial": false, "custo": 40
+  },
+  {
+    "id": "fantasma",
+    "nome": "Bola Fantasma",
+    "descricao": "Atravessa inimigos. Só ricocheteia nas paredes.",
+    "raridade": "rara",
+    "dano": 7, "velocidade": 13, "tamanho": 1.1, "ricochetes": 9, "piercing": 99,
+    "quantidade": 1, "cooldown": 1.2, "critico": 0.05,
+    "elementos": [], "comportamento": "fantasma",
+    "tags": ["piercing", "espectral"],
+    "cor": "#9ff5e6", "inicial": false, "custo": 60
+  },
+  {
+    "id": "clone",
+    "nome": "Bola Clone",
+    "descricao": "Ao destruir um inimigo, pode criar uma cópia temporária de si mesma.",
+    "raridade": "rara",
+    "dano": 8, "velocidade": 16, "tamanho": 0.95, "ricochetes": 5, "piercing": 0,
+    "quantidade": 1, "cooldown": 1.0, "critico": 0.05,
+    "elementos": [], "comportamento": "clone",
+    "tags": ["multiplicacao"],
+    "cor": "#e98cff", "inicial": false, "custo": 60
+  },
+  {
+    "id": "parasita",
+    "nome": "Parasita",
+    "descricao": "Gruda no inimigo e explode depois de alguns segundos.",
+    "raridade": "rara",
+    "dano": 12, "velocidade": 13, "tamanho": 1.0, "ricochetes": 1, "piercing": 0,
+    "quantidade": 1, "cooldown": 1.4, "critico": 0.05,
+    "elementos": [], "comportamento": "parasita",
+    "tags": ["area", "dot"],
+    "cor": "#c43d6b", "inicial": false, "custo": 70
+  },
+  {
+    "id": "gravidade",
+    "nome": "Gravidade",
+    "descricao": "Cria um campo que segura e machuca os inimigos próximos.",
+    "raridade": "epica",
+    "dano": 6, "velocidade": 12, "tamanho": 1.2, "ricochetes": 3, "piercing": 0,
+    "quantidade": 1, "cooldown": 1.6, "critico": 0.03,
+    "elementos": [], "comportamento": "gravidade",
+    "tags": ["controle", "area"],
+    "cor": "#6a4cff", "inicial": false, "custo": 90
+  },
+  {
+    "id": "espelho",
+    "nome": "Espelho",
+    "descricao": "Copia o efeito do último elemento que atingiu o alvo.",
+    "raridade": "epica",
+    "dano": 8, "velocidade": 16, "tamanho": 1.0, "ricochetes": 6, "piercing": 0,
+    "quantidade": 1, "cooldown": 1.0, "critico": 0.08,
+    "elementos": [], "comportamento": "espelho",
+    "tags": ["elemental", "critico"],
+    "cor": "#e8f0ff", "inicial": false, "custo": 90
+  },
+  {
+    "id": "termodinamica",
+    "nome": "Termodinâmica",
+    "descricao": "FUSÃO Brasa + Glacial. Queima, resfria e explode em inimigos congelados ou lentos.",
+    "raridade": "epica",
+    "dano": 14, "velocidade": 15, "tamanho": 1.15, "ricochetes": 6, "piercing": 0,
+    "quantidade": 2, "cooldown": 0.9, "critico": 0.06,
+    "elementos": ["fogo", "gelo"], "comportamento": "termodinamica",
+    "tags": ["elemental", "fogo", "gelo", "area", "fusao"],
+    "cor": "#ff4fa0", "componentes": ["brasa", "glacial"], "custo": 0
+  },
+  {
+    "id": "plasma",
+    "nome": "Plasma",
+    "descricao": "FUSÃO Brasa + Arco. Cada salto elétrico causa uma explosão incendiária.",
+    "raridade": "epica",
+    "dano": 12, "velocidade": 18, "tamanho": 1.05, "ricochetes": 6, "piercing": 0,
+    "quantidade": 2, "cooldown": 0.95, "critico": 0.06,
+    "elementos": ["fogo", "raio"], "comportamento": "plasma",
+    "tags": ["elemental", "fogo", "raio", "area", "fusao"],
+    "cor": "#ff5af0", "componentes": ["brasa", "arco"], "custo": 0
+  },
+  {
+    "id": "neurotoxica",
+    "nome": "Neurotóxica",
+    "descricao": "FUSÃO Peste + Arco. O veneno salta de inimigo para inimigo através das descargas.",
+    "raridade": "epica",
+    "dano": 10, "velocidade": 17, "tamanho": 1.0, "ricochetes": 7, "piercing": 0,
+    "quantidade": 2, "cooldown": 0.9, "critico": 0.05,
+    "elementos": ["veneno", "raio"], "comportamento": "neurotoxica",
+    "tags": ["elemental", "veneno", "raio", "dot", "fusao"],
+    "cor": "#b4ff3a", "componentes": ["peste", "arco"], "custo": 0
+  },
+  {
+    "id": "singularidade",
+    "nome": "Singularidade",
+    "descricao": "FUSÃO Glacial + Gravidade. Um campo que atrai e congela tudo ao redor.",
+    "raridade": "lendaria",
+    "dano": 10, "velocidade": 12, "tamanho": 1.3, "ricochetes": 4, "piercing": 0,
+    "quantidade": 1, "cooldown": 1.4, "critico": 0.04,
+    "elementos": ["gelo"], "comportamento": "singularidade",
+    "tags": ["elemental", "gelo", "controle", "area", "fusao"],
+    "cor": "#4f7dff", "componentes": ["glacial", "gravidade"], "custo": 0
+  }
+]

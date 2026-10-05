@@ -1,0 +1,16 @@
+[
+  {"id": "ampulheta", "nome": "Ampulheta Quebrada", "raridade": "rara", "cor": "#d9a35a",
+   "descricao": "Bolas 25% mais lentas, porém 40% mais poderosas.", "inicial": true, "custo": 0},
+  {"id": "olho_cacador", "nome": "Olho do Caçador", "raridade": "rara", "cor": "#ffe14a",
+   "descricao": "O primeiro inimigo que cada bola atinge recebe uma marca. O próximo golpe nele causa +100%.", "inicial": true, "custo": 0},
+  {"id": "nucleo_instavel", "nome": "Núcleo Instável", "raridade": "epica", "cor": "#ff5af0",
+   "descricao": "Qualquer personagem pode causar reações (25%). Reações podem disparar uma segunda reação.", "inicial": true, "custo": 0},
+  {"id": "bolsa_mercador", "nome": "Bolsa do Mercador", "raridade": "incomum", "cor": "#5fe0a0",
+   "descricao": "-20% de XP, porém uma opção extra a cada nível.", "inicial": true, "custo": 0},
+  {"id": "cafezinho", "nome": "Cafezinho Coado", "raridade": "incomum", "cor": "#8a5a3a",
+   "descricao": "+25% de velocidade de disparo. \"Ninguém trabalha sem um cafezinho.\"", "inicial": true, "custo": 0},
+  {"id": "bilhete_unico", "nome": "Bilhete Único", "raridade": "incomum", "cor": "#2e6fd8",
+   "descricao": "+2 ricochetes em todas as bolas. Integração garantida.", "inicial": false, "custo": 50},
+  {"id": "coracao_dragao", "nome": "Coração de Dragão", "raridade": "lendaria", "cor": "#ff3d1f",
+   "descricao": "LENDÁRIA. Todas as bolas recebem FOGO (+20% dano). Efeitos de GELO ficam bloqueados.", "inicial": false, "custo": 150}
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "id": "sao_paulo",
+    "nome": "São Paulo",
+    "subtitulo": "Avenida Paulista Fantástica",
+    "jogavel": true,
+    "recurso": "Sucata",
+    "tempo_chefe": 300,
+    "eventos_feira": [100, 210],
+    "velocidade_descida": [0.24, 0.42],
+    "preenchimento": [0.38, 0.78],
+    "escala_hp": [1.0, 3.2],
+    "chance_elite": 0.035,
+    "fases": [
+      {"t": 0,   "pool": {"pombo": 5, "drone": 2}},
+      {"t": 45,  "pool": {"pombo": 3, "drone": 3, "robo": 3}},
+      {"t": 100, "pool": {"pombo": 2, "drone": 3, "robo": 3, "fusca": 1}},
+      {"t": 160, "pool": {"pombo": 2, "drone": 3, "robo": 3, "fusca": 2, "concreto": 1}},
+      {"t": 230, "pool": {"pombo": 1, "drone": 3, "robo": 3, "fusca": 2, "concreto": 3}}
+    ],
+    "transito": {"inicio": 60, "intervalo": [9, 5], "faixa_y": 5.5},
+    "chefe": {"id": "arranha_ceu", "nome": "O Arranha-Céu", "hp": 16000,
+      "fala": "Você realmente achou que isso aqui era visita turística?"},
+    "mapa": {"x": 0.62, "y": 0.70}
+  },
+  {"id": "rio", "nome": "Rio de Janeiro", "subtitulo": "Cidade + morro + praia", "jogavel": false, "recurso": "Areia", "mapa": {"x": 0.72, "y": 0.78}},
+  {"id": "iguacu", "nome": "Cataratas do Iguaçu", "subtitulo": "Água + natureza + força", "jogavel": false, "recurso": "Névoa", "mapa": {"x": 0.45, "y": 0.86}},
+  {"id": "minas", "nome": "Minas Gerais", "subtitulo": "Montanhas + minas", "jogavel": false, "recurso": "Minério", "mapa": {"x": 0.66, "y": 0.60}},
+  {"id": "pantanal", "nome": "Pantanal", "subtitulo": "Águas que sobem e descem", "jogavel": false, "recurso": "Lodo", "mapa": {"x": 0.42, "y": 0.62}},
+  {"id": "nordeste", "nome": "Nordeste", "subtitulo": "Sertão + litoral", "jogavel": false, "recurso": "Relíquia", "mapa": {"x": 0.80, "y": 0.32}},
+  {"id": "amazonia", "nome": "Amazônia", "subtitulo": "Floresta + mistério", "jogavel": false, "recurso": "Essência", "mapa": {"x": 0.38, "y": 0.22}}
+]

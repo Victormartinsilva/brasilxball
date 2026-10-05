@@ -1,0 +1,41 @@
+[
+  {
+    "id": "guardiao",
+    "nome": "Guardião",
+    "arquetipo": "Defesa + força + bolas pesadas",
+    "estilo": "Poucas bolas. Muito dano. Alta resistência.",
+    "vida": 150, "velocidade": 5.0, "dano": 1.1, "cadencia": 0.9, "critico": 0.0,
+    "bola_inicial": "ferro",
+    "passiva": {"id": "muralha", "nome": "Muralha",
+      "descricao": "Quanto mais tempo uma bola permanece em campo, maior seu dano (+20%/s, até +150%)."},
+    "habilidade": {"id": "impacto", "nome": "Impacto", "recarga": 16, "duracao": 6,
+      "descricao": "Por 6s, cada bola que volta ao chão dispara uma onda de choque vertical."},
+    "cor": "#7d8a96", "cor2": "#8a5a3a"
+  },
+  {
+    "id": "cacadora",
+    "nome": "Caçadora",
+    "arquetipo": "Velocidade + crítico + combo",
+    "estilo": "Muitas bolas. Alta velocidade. Alto risco.",
+    "vida": 85, "velocidade": 8.5, "dano": 0.95, "cadencia": 1.2, "critico": 0.05,
+    "bola_inicial": "pedra",
+    "passiva": {"id": "cacada", "nome": "Caçada",
+      "descricao": "Cada abate aumenta a chance crítica em +1,5% (até +45%). O bônus some se o combo cair."},
+    "habilidade": {"id": "rajada", "nome": "Rajada", "recarga": 12, "duracao": 1.2,
+      "descricao": "Dispara 14 bolas pequenas em leque, em sequência."},
+    "cor": "#2f7a4a", "cor2": "#c2412d"
+  },
+  {
+    "id": "alquimista",
+    "nome": "Alquimista",
+    "arquetipo": "Elementos + reações",
+    "estilo": "Combinações. Controle. Dano elemental.",
+    "vida": 100, "velocidade": 6.5, "dano": 1.0, "cadencia": 1.0, "critico": 0.0,
+    "bola_inicial": "brasa",
+    "passiva": {"id": "reacao", "nome": "Reação",
+      "descricao": "Quando elementos diferentes atingem o mesmo inimigo, ocorre uma reação (60% de chance)."},
+    "habilidade": {"id": "catalisador", "nome": "Catalisador", "recarga": 15, "duracao": 7,
+      "descricao": "Por 7s, reações são garantidas, causam +60% de dano e toda bola aplica um elemento aleatório."},
+    "cor": "#3fb8a5", "cor2": "#e8b04a"
+  }
+]

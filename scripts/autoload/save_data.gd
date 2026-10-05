@@ -1,0 +1,163 @@
+extends Node
+## Progressão permanente (meta). Salvo em user:// — no navegador vira IndexedDB.
+
+const PATH := "user://ballxbrasil_save.json"
+const VERSION := 1
+
+## Melhorias do Arsenal: id -> {nome, max, custo_base, descricao}
+const UPGRADES := {
+	"vida": {"nome": "Couraça", "max": 5, "custo": 25, "descricao": "+12 de vida máxima por nível."},
+	"dano": {"nome": "Afiação", "max": 5, "custo": 30, "descricao": "+6% de dano por nível."},
+	"cadencia": {"nome": "Engrenagem", "max": 5, "custo": 30, "descricao": "+5% de cadência por nível."},
+	"ima": {"nome": "Imã de Sucata", "max": 3, "custo": 20, "descricao": "+25% de alcance de coleta por nível."},
+	"sorte": {"nome": "Patuá", "max": 3, "custo": 40, "descricao": "+1 rerrolagem de escolhas por run, por nível."},
+}
+
+## Fusões liberadas no Laboratório. As duas primeiras já vêm liberadas.
+const FUSION_COSTS := {"termodinamica": 0, "plasma": 0, "neurotoxica": 80, "singularidade": 120}
+
+var data: Dictionary = {}
+
+
+func _ready() -> void:
+	load_game()
+
+
+func default_data() -> Dictionary:
+	var balls: Array = []
+	for id in GameData.balls:
+		if GameData.balls[id].get("inicial", false):
+			balls.append(id)
+	var relics: Array = []
+	for id in GameData.relics:
+		if GameData.relics[id].get("inicial", false):
+			relics.append(id)
+	var fusions: Array = []
+	for id in FUSION_COSTS:
+		if FUSION_COSTS[id] == 0:
+			fusions.append(id)
+	return {
+		"versao": VERSION,
+		"sucata": 0,
+		"upgrades": {"vida": 0, "dano": 0, "cadencia": 0, "ima": 0, "sorte": 0},
+		"bolas": balls,
+		"fusoes": fusions,
+		"reliquias": relics,
+		"descobertas": [],
+		"regioes": ["sao_paulo"],
+		"stats": {"runs": 0, "vitorias": 0, "abates": 0, "melhor_tempo": 0.0, "melhor_combo": 0, "chefes": 0},
+		"opcoes": {"volume": 0.8, "tremor": true},
+	}
+
+
+func load_game() -> void:
+	data = default_data()
+	if not FileAccess.file_exists(PATH):
+		return
+	var f := FileAccess.open(PATH, FileAccess.READ)
+	if f == null:
+		return
+	var parsed = JSON.parse_string(f.get_as_text())
+	if typeof(parsed) != TYPE_DICTIONARY:
+		return
+	_merge(data, parsed)
+
+
+func _merge(base: Dictionary, incoming: Dictionary) -> void:
+	for k in incoming:
+		if base.has(k) and typeof(base[k]) == TYPE_DICTIONARY and typeof(incoming[k]) == TYPE_DICTIONARY:
+			_merge(base[k], incoming[k])
+		else:
+			base[k] = incoming[k]
+
+
+func save_game() -> void:
+	var f := FileAccess.open(PATH, FileAccess.WRITE)
+	if f:
+		f.store_string(JSON.stringify(data, "  "))
+
+
+func reset() -> void:
+	data = default_data()
+	save_game()
+
+
+func sucata() -> int:
+	return int(data["sucata"])
+
+
+func add_sucata(amount: int) -> void:
+	data["sucata"] = sucata() + amount
+
+
+func spend(amount: int) -> bool:
+	if sucata() < amount:
+		return false
+	data["sucata"] = sucata() - amount
+	save_game()
+	return true
+
+
+func upgrade_level(id: String) -> int:
+	return int(data["upgrades"].get(id, 0))
+
+
+func upgrade_cost(id: String) -> int:
+	var u: Dictionary = UPGRADES[id]
+	return int(u["custo"]) * (upgrade_level(id) + 1)
+
+
+func buy_upgrade(id: String) -> bool:
+	if upgrade_level(id) >= int(UPGRADES[id]["max"]):
+		return false
+	if not spend(upgrade_cost(id)):
+		return false
+	data["upgrades"][id] = upgrade_level(id) + 1
+	save_game()
+	return true
+
+
+func has_ball(id: String) -> bool:
+	return data["bolas"].has(id)
+
+
+func has_fusion(id: String) -> bool:
+	return data["fusoes"].has(id)
+
+
+func has_relic(id: String) -> bool:
+	return data["reliquias"].has(id)
+
+
+func unlock(list_key: String, id: String, cost: int) -> bool:
+	if data[list_key].has(id):
+		return false
+	if not spend(cost):
+		return false
+	data[list_key].append(id)
+	save_game()
+	return true
+
+
+func discover(id: String) -> void:
+	if not data["descobertas"].has(id):
+		data["descobertas"].append(id)
+
+
+func record_run(result: Dictionary) -> void:
+	var s: Dictionary = data["stats"]
+	s["runs"] = int(s["runs"]) + 1
+	s["abates"] = int(s["abates"]) + int(result.get("abates", 0))
+	s["melhor_combo"] = maxi(int(s["melhor_combo"]), int(result.get("melhor_combo", 0)))
+	if result.get("vitoria", false):
+		s["vitorias"] = int(s["vitorias"]) + 1
+		s["chefes"] = int(s["chefes"]) + 1
+		var t := float(result.get("tempo", 0.0))
+		if float(s["melhor_tempo"]) <= 0.0 or t < float(s["melhor_tempo"]):
+			s["melhor_tempo"] = t
+		# Vencer o primeiro chefe revela a relíquia lendária no Relicário.
+		discover("coracao_dragao")
+	add_sucata(int(result.get("sucata", 0)))
+	for id in result.get("descobertas", []):
+		discover(id)
+	save_game()

@@ -41,9 +41,9 @@ godot --headless --fixed-fps 60 -- --autotest cacadora 420   # IA joga uma run i
 
 | Ação | Teclado/mouse | Toque |
 |---|---|---|
-| Mover (X e Y na faixa de defesa) | `WASD` / setas · clique e segure | arrastar o dedo em qualquer lugar |
+| Mover (X e Y na faixa de defesa) | `WASD` / setas · clique e segure | joystick virtual no lado **esquerdo** da tela |
 | Ligar/desligar chute | `Q` | botão "Chute" |
-| Mirar | mouse (`T` liga a mira automática) | ponto tocado |
+| Mirar | mouse (`T` liga a mira automática) | joystick virtual no lado **direito** (soltou → mira automática) |
 | Habilidade | `Espaço` / botão direito | — |
 | Escolher upgrade | `1` `2` `3` `4` / clique | tocar na carta |
 | Velocidade | `Tab` / botões `> >> >>>` | botões |

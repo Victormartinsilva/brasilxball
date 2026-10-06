@@ -80,8 +80,13 @@ var auto_aim := true
 var aim_point := Vector2(0, 10)
 var mouse_held := false
 var touch_mode := false
-var _touch_start_ground := Vector2.ZERO
-var _touch_start_player := Vector2.ZERO
+var move_touch := -1          # índice do dedo no joystick de movimento (-1 = solto)
+var aim_touch := -1           # índice do dedo no joystick de mira
+var move_origin := Vector2.ZERO
+var aim_origin := Vector2.ZERO
+var move_stick := Vector2.ZERO  # -1..1 em coordenadas de tela
+var aim_stick := Vector2.ZERO
+var _stick_aim_dir := Vector2.ZERO  # última direção dada pelo joystick de mira
 
 var _row_progress := 0.0
 var _shake := 0.0
@@ -202,30 +207,36 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	# ---- Toque (celular): arrastar em qualquer lugar move o personagem de forma relativa,
-	# assim o dedo não cobre o boneco. A mira fica automática (ou segue o dedo em "Mira LIVRE").
+	# ---- Toque (celular): dois joysticks virtuais que nascem onde o dedo encosta.
+	# Metade ESQUERDA = mover (frente, trás, lados). Metade DIREITA = mirar.
+	# Funcionam ao mesmo tempo (multitoque). Os botões do HUD consomem o toque antes daqui.
 	if event is InputEventScreenTouch:
 		touch_mode = true
-		if event.index == 0:
-			if event.pressed:
-				_touch_start_ground = _screen_to_ground(event.position)
-				_touch_start_player = player.pos
-				player.target_x = player.pos.x
-				player.target_y = player.pos.y
-				player.use_target = true
-			else:
-				player.use_target = false
+		var vp := get_viewport().get_visible_rect().size
+		if event.pressed:
+			if event.position.x < vp.x * 0.5 and move_touch == -1:
+				move_touch = event.index
+				move_origin = event.position
+				move_stick = Vector2.ZERO
+			elif event.position.x >= vp.x * 0.5 and aim_touch == -1:
+				aim_touch = event.index
+				aim_origin = event.position
+				aim_stick = Vector2.ZERO
+		else:
+			if event.index == move_touch:
+				move_touch = -1
+				move_stick = Vector2.ZERO
+			elif event.index == aim_touch:
+				aim_touch = -1
+				aim_stick = Vector2.ZERO
 		return
 	if event is InputEventScreenDrag:
 		touch_mode = true
-		if event.index == 0:
-			var g := _screen_to_ground(event.position)
-			var t := _touch_start_player + (g - _touch_start_ground) * 1.35
-			player.target_x = clampf(t.x, -Player.LIMIT, Player.LIMIT)
-			player.target_y = clampf(t.y, Player.Y, Player.Y_MAX)
-			player.use_target = true
-			if not auto_aim:
-				aim_point = g
+		var r := stick_radius()
+		if event.index == move_touch:
+			move_stick = ((event.position - move_origin) / r).limit_length(1.0)
+		elif event.index == aim_touch:
+			aim_stick = ((event.position - aim_origin) / r).limit_length(1.0)
 		return
 	if touch_mode and (event is InputEventMouseMotion or event is InputEventMouseButton):
 		return  # eventos de mouse emulados a partir do toque
@@ -255,6 +266,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		toggle_kick()
 
 
+## Raio do joystick virtual em pixels de tela (proporcional à tela).
+func stick_radius() -> float:
+	var vp := get_viewport().get_visible_rect().size
+	return clampf(minf(vp.x, vp.y) * 0.14, 50.0, 110.0)
+
+
 func _screen_to_ground(sp: Vector2) -> Vector2:
 	var from := camera.project_ray_origin(sp)
 	var dir := camera.project_ray_normal(sp)
@@ -267,6 +284,9 @@ func _screen_to_ground(sp: Vector2) -> Vector2:
 
 func _update_aim(delta: float) -> void:
 	var axis := Vector2(Input.get_axis("move_left", "move_right"), Input.get_axis("move_down", "move_up"))
+	if move_touch >= 0:
+		# Tela: para cima = para frente (rumo às tropas). Zona morta pequena.
+		axis = Vector2(move_stick.x, -move_stick.y) if move_stick.length() > 0.12 else Vector2.ZERO
 	if autoplay:
 		axis = _autoplay_axis()
 	# Chutar deixa o personagem mais lento — às vezes vale parar de chutar para correr.
@@ -276,6 +296,10 @@ func _update_aim(delta: float) -> void:
 	if auto_aim or autoplay:
 		target = _auto_target()
 	var d := target - (player.pos + Vector2(0, 0.6))
+	if aim_touch >= 0 and aim_stick.length() > 0.25:
+		_stick_aim_dir = Vector2(aim_stick.x, -aim_stick.y).normalized()
+	if touch_mode and _stick_aim_dir != Vector2.ZERO and (aim_touch >= 0 or not auto_aim):
+		d = _stick_aim_dir  # joystick de mira manda (com Mira LIVRE, a última direção fica)
 	if d.length() < 0.1:
 		d = Vector2.UP
 	d = d.normalized()

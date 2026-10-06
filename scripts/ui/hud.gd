@@ -303,6 +303,7 @@ func _draw_gauges() -> void:
 		var fy := lerpf(rbot, rtop, float(t) / boss_t)
 		_draw_skull(c, Vector2(rx, fy), 10.0, UIKit.TEAL if run.time < float(t) else Color("#555"))
 	_draw_skull(c, Vector2(rx, rtop - 16), 15.0, Color("#ff3d1f") if not run.boss_spawned else UIKit.GOLD)
+	_draw_sticks(c, font, size)
 	# ---------- Barra de XP (base, largura total)
 	var xp_ratio := clampf(run.xp / run.xp_next, 0.0, 1.0)
 	var bar := Rect2(16, size.y - 26, size.x - 32, 14)
@@ -317,6 +318,29 @@ func _draw_gauges() -> void:
 		c.draw_rect(Rect2(br.position, Vector2(bw * run.boss.hp_ratio(), 18)), Color("#c2412d"))
 		c.draw_rect(br, UIKit.GOLD, false, 2.0)
 		_text(c, font, br.position + Vector2(0, -6), "%s  —  %d" % [run.region["chefe"]["nome"], ceili(run.boss.hp)], bw, 16)
+
+
+## Joysticks virtuais (celular): nascem onde o dedo encosta; sem toque, mostram onde ficam.
+func _draw_sticks(c: Control, font: Font, size: Vector2) -> void:
+	if not run.touch_mode:
+		return
+	var r := run.stick_radius()
+	var sticks := [
+		[run.move_touch >= 0, run.move_origin, run.move_stick, Vector2(size.x * 0.25, size.y * 0.66), "MOVER", Color("#5fe0a0")],
+		[run.aim_touch >= 0, run.aim_origin, run.aim_stick, Vector2(size.x * 0.72, size.y * 0.58), "MIRAR", Color("#ffe14a")],
+	]
+	for st in sticks:
+		var active: bool = st[0]
+		var origin: Vector2 = st[1] if active else st[3]
+		var knob: Vector2 = origin + (st[2] as Vector2) * r
+		var col: Color = st[5]
+		var a := 0.55 if active else 0.16
+		c.draw_circle(origin, r, Color(UIKit.INK, a * 0.6))
+		c.draw_arc(origin, r, 0, TAU, 48, Color(col, a + 0.1), 3.0)
+		c.draw_circle(knob, r * 0.42, Color(col, a))
+		c.draw_arc(knob, r * 0.42, 0, TAU, 32, Color(UIKit.INK, a + 0.2), 2.0)
+		if not active:
+			_text(c, font, origin + Vector2(-60, r + 22), st[4], 120, 14)
 
 
 func _text(c: Control, font: Font, p: Vector2, txt: String, w: float, fs: int) -> void:
@@ -390,7 +414,7 @@ func _build_pause() -> void:
 	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(t)
 	var help := UIKit.wrap_label(
-		"Celular: arraste o dedo em qualquer lugar para mover. Toque no orbe para a habilidade.\nPC: A / D ou setas para mover, mouse para mirar, Espaço para a habilidade, T para a mira automática, Tab para a velocidade.", 17, UIKit.MUTED)
+		"Celular: lado ESQUERDO da tela = joystick de mover; lado DIREITO = joystick de mirar. Toque no orbe para a habilidade.\nPC: A / D ou setas para mover, mouse para mirar, Espaço para a habilidade, T para a mira automática, Tab para a velocidade.", 17, UIKit.MUTED)
 	help.custom_minimum_size.x = minf(440.0, _root.size.x - 80.0)
 	v.add_child(help)
 	v.add_child(UIKit.button("Continuar", toggle_pause, 26, 320))

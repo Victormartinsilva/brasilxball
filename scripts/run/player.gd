@@ -51,6 +51,11 @@ func move(axis: float, delta: float) -> void:
 	if use_target and absf(axis) < 0.01:
 		var diff := target_x - pos.x
 		axis = clampf(diff * 3.0, -1.0, 1.0) if absf(diff) > 0.05 else 0.0
+		# Seguir o dedo/cursor é um pouco mais ágil que o teclado, mas nunca teleporta.
+		var step := axis * move_speed * 1.5 * delta
+		pos.x = clampf(pos.x + (step if absf(step) < absf(diff) else diff), -LIMIT, LIMIT)
+		_sync()
+		return
 	pos.x = clampf(pos.x + axis * move_speed * delta, -LIMIT, LIMIT)
 	_sync()
 

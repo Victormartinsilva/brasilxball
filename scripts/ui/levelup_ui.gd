@@ -12,7 +12,7 @@ const TYPE_NAMES := {
 var _root: Control
 var _title: Label
 var _subtitle: Label
-var _cards: HBoxContainer
+var _cards: BoxContainer
 var _reroll: Button
 var _offers: Array = []
 var _context := ""
@@ -45,7 +45,8 @@ func _ready() -> void:
 	_subtitle = UIKit.label("", 20, UIKit.CREAM, 4)
 	_subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(_subtitle)
-	_cards = UIKit.hbox(16)
+	_cards = BoxContainer.new()
+	_cards.add_theme_constant_override("separation", 16)
 	_cards.alignment = BoxContainer.ALIGNMENT_CENTER
 	v.add_child(_cards)
 	var foot := UIKit.hbox(10)
@@ -80,24 +81,73 @@ func _rebuild_cards() -> void:
 	for c in _cards.get_children():
 		c.queue_free()
 	var vp := get_viewport().get_visible_rect().size
-	var card_w := clampf((vp.x - 120.0) / maxf(1.0, _offers.size()) - 16.0, 170.0, 260.0)
+	var portrait := vp.x < vp.y
+	_cards.vertical = portrait
+	_title.add_theme_font_size_override("font_size", 36 if portrait else 46)
 	for i in _offers.size():
-		_cards.add_child(_make_card(_offers[i], i, card_w))
+		if portrait:
+			_cards.add_child(_make_row_card(_offers[i], i, minf(680.0, vp.x - 24.0)))
+		else:
+			var card_w := clampf((vp.x - 120.0) / maxf(1.0, _offers.size()) - 16.0, 170.0, 260.0)
+			_cards.add_child(_make_card(_offers[i], i, card_w))
 	_reroll.visible = _context == "levelup" and _build.rerolls > 0
 	_reroll.text = "Rerrolar (%d)" % _build.rerolls
 
 
-func _make_card(o: Dictionary, index: int, w: float) -> Control:
+func _card_shell(o: Dictionary, index: int, size: Vector2) -> PanelContainer:
 	var rc := GameData.rarity_color(o.get("raridade", "comum"))
 	var card := PanelContainer.new()
 	card.add_theme_stylebox_override("panel", UIKit.box(Color("#1f1812"), rc, 3, 10, 14))
-	card.custom_minimum_size = Vector2(w, 340)
+	card.custom_minimum_size = size
 	card.mouse_filter = Control.MOUSE_FILTER_STOP
 	card.gui_input.connect(func(ev: InputEvent):
-		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
-			_pick(index))
+		# Escolhe ao SOLTAR, e só se o toque começou nesta carta (evita escolher sem querer
+		# quando o dedo ainda estava arrastando o personagem no momento em que a tela abriu).
+		if ev is InputEventMouseButton and ev.button_index == MOUSE_BUTTON_LEFT:
+			if ev.pressed:
+				card.set_meta("down", true)
+			elif card.get_meta("down", false):
+				_pick(index))
 	card.mouse_entered.connect(func(): card.modulate = Color(1.15, 1.12, 1.05))
 	card.mouse_exited.connect(func(): card.modulate = Color.WHITE)
+	return card
+
+
+func _level_text(o: Dictionary) -> String:
+	var t: String = GameData.RARITY_NAMES.get(o.get("raridade", "comum"), "")
+	match o["tipo"]:
+		"up_bola":
+			t += "  •  Nv %d → %d" % [int(o["nivel"]) - 1, int(o["nivel"])]
+		"passiva":
+			t += "  •  Nv %d" % int(o["nivel"])
+	return t
+
+
+## Celular em pé: carta larga (ícone à esquerda, texto à direita), uma embaixo da outra.
+func _make_row_card(o: Dictionary, index: int, w: float) -> Control:
+	var rc := GameData.rarity_color(o.get("raridade", "comum"))
+	var card := _card_shell(o, index, Vector2(w, 140))
+	var h := UIKit.hbox(14)
+	h.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(h)
+	var icon_box := CenterContainer.new()
+	icon_box.custom_minimum_size = Vector2(84, 0)
+	h.add_child(icon_box)
+	icon_box.add_child(UIKit.icon(o.get("cor", Color.WHITE), String(o["nome"]).substr(0, 1), 72.0))
+	var v := UIKit.vbox(2)
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	h.add_child(v)
+	v.add_child(UIKit.label(TYPE_NAMES.get(o["tipo"], "") + "  ·  " + _level_text(o), 15, rc, 3))
+	v.add_child(UIKit.label(o["nome"], 26, UIKit.CREAM, 5))
+	var desc := UIKit.wrap_label(o.get("descricao", ""), 17, UIKit.CREAM)
+	desc.custom_minimum_size.x = w - 140.0
+	v.add_child(desc)
+	return card
+
+
+func _make_card(o: Dictionary, index: int, w: float) -> Control:
+	var rc := GameData.rarity_color(o.get("raridade", "comum"))
+	var card := _card_shell(o, index, Vector2(w, 340))
 	var v := UIKit.vbox(6)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(v)
@@ -113,13 +163,7 @@ func _make_card(o: Dictionary, index: int, w: float) -> Control:
 	title_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title_l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(title_l)
-	var lvl_text: String = GameData.RARITY_NAMES.get(o.get("raridade", "comum"), "")
-	match o["tipo"]:
-		"up_bola":
-			lvl_text += "  •  Nv %d → %d" % [int(o["nivel"]) - 1, int(o["nivel"])]
-		"passiva":
-			lvl_text += "  •  Nv %d" % int(o["nivel"])
-	var lv := UIKit.label(lvl_text, 14, rc, 3)
+	var lv := UIKit.label(_level_text(o), 14, rc, 3)
 	lv.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(lv)
 	var desc := UIKit.wrap_label(o.get("descricao", ""), 15, UIKit.CREAM)
@@ -149,7 +193,7 @@ func _pick(index: int) -> void:
 	if not _open or index >= _offers.size():
 		return
 	# Evita clique acidental no instante em que a tela abre.
-	if Time.get_ticks_msec() - _opened_at < 250 and not (get_parent() as Run).autoplay:
+	if Time.get_ticks_msec() - _opened_at < 400 and not (get_parent() as Run).autoplay:
 		return
 	var offer: Dictionary = _offers[index]
 	_open = false

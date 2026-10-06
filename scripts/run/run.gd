@@ -75,6 +75,9 @@ var _tiers_paid: Array = []
 var auto_aim := true
 var aim_point := Vector2(0, 10)
 var mouse_held := false
+var touch_mode := false
+var _touch_start_ground := Vector2.ZERO
+var _touch_start_player := 0.0
 
 var _row_progress := 0.0
 var _shake := 0.0
@@ -93,6 +96,7 @@ func setup(char_id: String, region_id: String) -> void:
 
 func _ready() -> void:
 	rng.randomize()
+	touch_mode = GameData.is_mobile()
 	build = RunBuild.new(character)
 	max_hp = float(character["vida"]) + build.max_hp_bonus()
 	hp = max_hp
@@ -179,6 +183,30 @@ func _process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	# ---- Toque (celular): arrastar em qualquer lugar move o personagem de forma relativa,
+	# assim o dedo não cobre o boneco. A mira fica automática (ou segue o dedo em "Mira LIVRE").
+	if event is InputEventScreenTouch:
+		touch_mode = true
+		if event.index == 0:
+			if event.pressed:
+				_touch_start_ground = _screen_to_ground(event.position)
+				_touch_start_player = player.pos.x
+				player.target_x = player.pos.x
+				player.use_target = true
+			else:
+				player.use_target = false
+		return
+	if event is InputEventScreenDrag:
+		touch_mode = true
+		if event.index == 0:
+			var g := _screen_to_ground(event.position)
+			player.target_x = clampf(_touch_start_player + (g.x - _touch_start_ground.x) * 1.35, -Player.LIMIT, Player.LIMIT)
+			player.use_target = true
+			if not auto_aim:
+				aim_point = g
+		return
+	if touch_mode and (event is InputEventMouseMotion or event is InputEventMouseButton):
+		return  # eventos de mouse emulados a partir do toque
 	if event is InputEventMouseMotion:
 		auto_aim = false
 		aim_point = _screen_to_ground(event.position)

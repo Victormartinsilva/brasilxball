@@ -85,6 +85,7 @@ static func button(text: String, cb: Callable, size := 20, min_w := 0.0) -> Butt
 	b.add_theme_font_size_override("font_size", size)
 	if min_w > 0.0:
 		b.custom_minimum_size.x = min_w
+	b.custom_minimum_size.y = maxf(b.custom_minimum_size.y, 56.0)  # alvo de toque confortável
 	b.pressed.connect(cb)
 	return b
 

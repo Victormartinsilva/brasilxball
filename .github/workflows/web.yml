@@ -1,4 +1,4 @@
-name: Web build (Godot → Vercel)
+name: Web build (Godot)
 
 on:
   push:
@@ -52,43 +52,12 @@ jobs:
         run: |
           mkdir -p build/web
           ~/godot/godot --headless --export-release "Web" build/web/index.html
-          rm -rf site/play && mkdir -p site/play && cp -r build/web/* site/play/
-          ls -la site/play
+          ls -la build/web
+          # O build publicado pela Vercel fica versionado em site/play (tools/build_web.sh).
+          # Avisa se o .pck versionado ficou para trás do código (não falha o CI).
+          cmp -s build/web/index.pck site/play/index.pck && echo "site/play em dia" || echo "::warning::site/play desatualizado — rode tools/build_web.sh e faça commit"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: site
-          path: site
-
-  deploy:
-    needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: site
-          path: site
-
-      # Opção A (sem secrets): publica o site pronto na branch deploy-web.
-      # Na Vercel: importe o repositório e defina Production Branch = deploy-web,
-      # Framework = Other, sem build command, Output Directory = "." (raiz).
-      - name: Publicar na branch deploy-web
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: deploy-web
-          publish_dir: ./site
-          force_orphan: true
-          commit_message: "deploy: ${{ github.sha }}"
-
-      # Opção B (com secrets VERCEL_TOKEN / VERCEL_ORG_ID / VERCEL_PROJECT_ID).
-      - name: Deploy direto na Vercel (opcional)
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        if: env.VERCEL_TOKEN != ''
-        run: npx --yes vercel@latest deploy site --prod --yes --token="$VERCEL_TOKEN"
+          name: web
+          path: build/web

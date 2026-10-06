@@ -321,7 +321,7 @@ func _build_background_traffic() -> void:
 
 func _build_rain() -> void:
 	rain = CPUParticles3D.new()
-	rain.amount = 500
+	rain.amount = 220 if GameData.is_mobile() else 500
 	rain.lifetime = 0.9
 	rain.preprocess = 1.0
 	rain.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX

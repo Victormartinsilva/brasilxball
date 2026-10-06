@@ -26,7 +26,7 @@ func _ready() -> void:
 	var p := UIKit.panel()
 	center.add_child(p)
 	var v := UIKit.vbox(10)
-	v.custom_minimum_size.x = 560
+	v.custom_minimum_size.x = minf(560.0, get_viewport().get_visible_rect().size.x - 60.0)
 	p.add_child(v)
 
 	var win: bool = _result.get("vitoria", false)

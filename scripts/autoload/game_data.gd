@@ -39,16 +39,26 @@ func _ready() -> void:
 	_setup_input()
 	get_tree().root.size_changed.connect(_adapt_orientation)
 	_adapt_orientation()
+	if is_mobile():
+		# GPU de celular + tela de alta densidade: renderiza o 3D em resolução menor.
+		get_tree().root.scaling_3d_scale = 0.7
+		get_tree().root.msaa_3d = Viewport.MSAA_DISABLED
 
 
-## Celular em pé: a UI passa a ser desenhada numa base 720x1280 para não ficar minúscula.
+## Celular em pé: a UI passa a ser desenhada numa base 540x960 para não ficar minúscula.
 func _adapt_orientation() -> void:
 	var root := get_tree().root
 	var s := root.size
 	if s.y <= 0:
 		return
 	var portrait := float(s.x) / float(s.y) < 0.9
-	root.content_scale_size = Vector2i(720, 1280) if portrait else Vector2i(1280, 720)
+	root.content_scale_size = Vector2i(540, 960) if portrait else Vector2i(1280, 720)
+
+
+## Celular/tablet (navegador ou nativo). Usado para controles, qualidade gráfica e layout.
+func is_mobile() -> bool:
+	return OS.has_feature("web_android") or OS.has_feature("web_ios") or OS.has_feature("mobile") \
+		or (OS.has_feature("web") and DisplayServer.is_touchscreen_available())
 
 
 func is_portrait() -> bool:

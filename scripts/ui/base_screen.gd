@@ -13,6 +13,7 @@ var _selected_region := "sao_paulo"
 var _char_cards: Dictionary = {}
 var _map: Control
 var _region_info: Label
+var _char_detail: VBoxContainer
 
 
 func _ready() -> void:
@@ -29,7 +30,7 @@ func _ready() -> void:
 	var margin := MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
-		margin.add_theme_constant_override("margin_" + side, 24)
+		margin.add_theme_constant_override("margin_" + side, 12 if GameData.is_portrait() else 24)
 	_root.add_child(margin)
 	var v := UIKit.vbox(10)
 	margin.add_child(v)
@@ -37,7 +38,7 @@ func _ready() -> void:
 	var top := UIKit.hbox(16)
 	v.add_child(top)
 	top.add_child(UIKit.button("< Menu", func(): back.emit(), 16))
-	top.add_child(UIKit.label("ACAMPAMENTO", 34, UIKit.GOLD, 8))
+	top.add_child(UIKit.label("ACAMPAMENTO", 24 if GameData.is_portrait() else 34, UIKit.GOLD, 8))
 	var sp := Control.new()
 	sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(sp)
@@ -45,9 +46,12 @@ func _ready() -> void:
 	top.add_child(_sucata)
 
 	_tabs = TabContainer.new()
+	_tabs.clip_tabs = true  # no celular as abas rolam em vez de alargar a tela
 	_tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	v.add_child(_tabs)
+	_tabs.add_theme_font_size_override("font_size", 15 if GameData.is_portrait() else 17)
 	_build_expedition()
+	_build_map()
 	_build_workshop()
 	_build_lab()
 	_build_arsenal()
@@ -63,7 +67,7 @@ func _refresh() -> void:
 func _rebuild_tab(index: int) -> void:
 	var current := _tabs.current_tab
 	var old := _tabs.get_child(index)
-	var builders := [_build_expedition, _build_workshop, _build_lab, _build_arsenal, _build_reliquary, _build_records]
+	var builders := [_build_expedition, _build_map, _build_workshop, _build_lab, _build_arsenal, _build_reliquary, _build_records]
 	_tabs.remove_child(old)
 	old.queue_free()
 	builders[index].call()
@@ -83,83 +87,70 @@ func _scroll_tab(title: String) -> VBoxContainer:
 	return v
 
 
-# ---------------------------------------------------------------- EXPEDIÇÃO
+# ---------------------------------------------------------------- JOGAR (personagem + início)
 
 func _build_expedition() -> void:
-	var h := BoxContainer.new()
-	h.vertical = GameData.is_portrait()
-	h.add_theme_constant_override("separation", 16)
-	h.name = "Expedição"
-	_tabs.add_child(h)
-
-	# Mapa do Brasil (árvore de progressão estilizada).
-	var map_panel := UIKit.panel(Color("#16241a"), Color("#3d8048"))
-	map_panel.custom_minimum_size = Vector2(380, 0)
-	if h.vertical:
-		map_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	h.add_child(map_panel)
-	var mv := UIKit.vbox(6)
-	map_panel.add_child(mv)
-	mv.add_child(UIKit.label("MAPA DO BRASIL", 20, UIKit.GOLD, 4))
-	_map = Control.new()
-	_map.custom_minimum_size = Vector2(340, 330)
-	_map.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_map.draw.connect(_draw_map)
-	_map.gui_input.connect(_map_input)
-	mv.add_child(_map)
-	_region_info = UIKit.wrap_label("", 15)
-	mv.add_child(_region_info)
-	_update_region_info()
-
-	# Personagens.
-	var right := UIKit.vbox(10)
-	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	right.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	h.add_child(right)
-	right.add_child(UIKit.label("ESCOLHA SEU PERSONAGEM", 20, UIKit.GOLD, 4))
-	var cards := UIKit.hbox(12)
-	cards.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	right.add_child(cards)
+	var v := UIKit.vbox(12)
+	v.name = "Jogar"
+	_tabs.add_child(v)
+	var reg: Dictionary = GameData.regions[_selected_region]
+	var region_btn := UIKit.button("Região: %s  (ver mapa)" % reg["nome"], func(): _tabs.current_tab = 1, 18)
+	v.add_child(region_btn)
+	v.add_child(UIKit.label("ESCOLHA SEU PERSONAGEM", 22, UIKit.GOLD, 4))
+	var chips := UIKit.hbox(10)
+	v.add_child(chips)
 	_char_cards.clear()
 	for cid in GameData.character_order:
-		var card := _character_card(GameData.characters[cid])
-		cards.add_child(card)
+		var card := _character_chip(GameData.characters[cid])
+		chips.add_child(card)
 		_char_cards[cid] = card
+	var sc := ScrollContainer.new()
+	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	v.add_child(sc)
+	_char_detail = UIKit.vbox(6)
+	_char_detail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sc.add_child(_char_detail)
+	var go := UIKit.button("INICIAR RUN", func(): start_run.emit(_selected_char, _selected_region), 32)
+	go.custom_minimum_size.y = 88
+	v.add_child(go)
 	_select_char(_selected_char)
-	var go := UIKit.button("INICIAR RUN", func(): start_run.emit(_selected_char, _selected_region), 26)
-	go.custom_minimum_size.y = 56
-	right.add_child(go)
 
 
-func _character_card(c: Dictionary) -> Control:
+## Ficha compacta e grande para o dedo: ícone + nome + arquétipo.
+func _character_chip(c: Dictionary) -> Control:
 	var card := PanelContainer.new()
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card.custom_minimum_size.y = 120
 	card.mouse_filter = Control.MOUSE_FILTER_STOP
 	card.gui_input.connect(func(ev: InputEvent):
-		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+		if ev is InputEventMouseButton and not ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
 			_select_char(c["id"]))
-	var v := UIKit.vbox(5)
+	var v := UIKit.vbox(4)
+	v.alignment = BoxContainer.ALIGNMENT_CENTER
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(v)
-	var head := UIKit.hbox(8)
-	v.add_child(head)
-	head.add_child(UIKit.icon(Color(c["cor"]), String(c["nome"]).substr(0, 1), 48.0))
-	var hv := UIKit.vbox(0)
-	head.add_child(hv)
-	hv.add_child(UIKit.label(c["nome"], 24, UIKit.CREAM, 5))
-	hv.add_child(UIKit.label(c["arquetipo"], 13, UIKit.MUTED, 2))
-	var ball: Dictionary = GameData.balls[c["bola_inicial"]]
-	for line in [
-		"Vida %d  •  Velocidade %.1f" % [int(c["vida"]), float(c["velocidade"])],
-		"Bola inicial: %s" % ball["nome"],
-	]:
-		v.add_child(UIKit.label(line, 14, UIKit.CREAM, 2))
-	v.add_child(UIKit.label("Passiva — " + String(c["passiva"]["nome"]), 15, UIKit.GOLD, 3))
-	v.add_child(UIKit.wrap_label(c["passiva"]["descricao"], 13))
-	v.add_child(UIKit.label("Habilidade — " + String(c["habilidade"]["nome"]), 15, UIKit.TEAL, 3))
-	v.add_child(UIKit.wrap_label(c["habilidade"]["descricao"], 13))
-	v.add_child(UIKit.wrap_label(c["estilo"], 13, UIKit.MUTED))
+	var ic := CenterContainer.new()
+	ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ic.add_child(UIKit.icon(Color(c["cor"]), String(c["nome"]).substr(0, 1), 50.0))
+	v.add_child(ic)
+	var n := UIKit.label(c["nome"], 18, UIKit.CREAM, 5)
+	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(n)
 	return card
+
+
+func _fill_detail(c: Dictionary) -> void:
+	for ch in _char_detail.get_children():
+		ch.queue_free()
+	var ball: Dictionary = GameData.balls[c["bola_inicial"]]
+	_char_detail.add_child(UIKit.wrap_label("%s — %s" % [c["nome"], c["arquetipo"]], 21, Color(c["cor"]).lightened(0.3)))
+	_char_detail.add_child(UIKit.wrap_label("Vida %d  •  Velocidade %.1f  •  Bola inicial: %s" % [int(c["vida"]), float(c["velocidade"]), ball["nome"]], 17))
+	_char_detail.add_child(UIKit.label("Passiva — " + String(c["passiva"]["nome"]), 19, UIKit.GOLD, 3))
+	_char_detail.add_child(UIKit.wrap_label(c["passiva"]["descricao"], 17))
+	_char_detail.add_child(UIKit.label("Habilidade — " + String(c["habilidade"]["nome"]), 19, UIKit.TEAL, 3))
+	_char_detail.add_child(UIKit.wrap_label(c["habilidade"]["descricao"], 17))
+	_char_detail.add_child(UIKit.wrap_label(c["estilo"], 17, UIKit.MUTED))
 
 
 func _select_char(cid: String) -> void:
@@ -168,7 +159,28 @@ func _select_char(cid: String) -> void:
 		var card: PanelContainer = _char_cards[id]
 		var on: bool = id == cid
 		var col := Color(GameData.characters[id]["cor"])
-		card.add_theme_stylebox_override("panel", UIKit.box(Color("#241a12") if on else Color("#17110c"), col if on else Color(col, 0.3), 3 if on else 1, 10, 12))
+		card.add_theme_stylebox_override("panel", UIKit.box(Color("#241a12") if on else Color("#17110c"), col if on else Color(col, 0.3), 4 if on else 1, 10, 10))
+	_fill_detail(GameData.characters[cid])
+
+
+# ---------------------------------------------------------------- MAPA
+
+func _build_map() -> void:
+	var map_panel := UIKit.panel(Color("#16241a"), Color("#3d8048"))
+	map_panel.name = "Mapa"
+	_tabs.add_child(map_panel)
+	var mv := UIKit.vbox(6)
+	map_panel.add_child(mv)
+	mv.add_child(UIKit.label("MAPA DO BRASIL", 22, UIKit.GOLD, 4))
+	_map = Control.new()
+	_map.custom_minimum_size = Vector2(300, 300)
+	_map.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_map.draw.connect(_draw_map)
+	_map.gui_input.connect(_map_input)
+	mv.add_child(_map)
+	_region_info = UIKit.wrap_label("", 17)
+	mv.add_child(_region_info)
+	_update_region_info()
 
 
 func _map_points() -> Dictionary:
@@ -242,7 +254,7 @@ func _build_workshop() -> void:
 	var v := _scroll_tab("Oficina")
 	v.add_child(UIKit.label("Bolas descobertas entram no sorteio das runs.", 16, UIKit.MUTED, 2))
 	var grid := GridContainer.new()
-	grid.columns = 2
+	grid.columns = 1 if GameData.is_portrait() else 2
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 10)
 	v.add_child(grid)
@@ -258,7 +270,7 @@ func _build_workshop() -> void:
 			var cost := int(b["custo"])
 			var on_buy := func():
 				if Save.unlock("bolas", bid, cost):
-					_rebuild_tab(1)
+					_rebuild_tab(2)
 			var btn := UIKit.button("Fabricar (%d)" % cost, on_buy, 15)
 			btn.disabled = Save.sucata() < cost
 			row.add_child(btn)
@@ -275,7 +287,7 @@ func _item_row(color: Color, title: String, sub: String, desc: String) -> HBoxCo
 	tv.add_child(UIKit.label(title, 18, UIKit.CREAM, 4))
 	tv.add_child(UIKit.label(sub, 12, UIKit.MUTED, 2))
 	var d := UIKit.wrap_label(desc, 13)
-	d.custom_minimum_size.x = 260
+	d.custom_minimum_size.x = 200
 	tv.add_child(d)
 	return row
 
@@ -283,7 +295,7 @@ func _item_row(color: Color, title: String, sub: String, desc: String) -> HBoxCo
 # ---------------------------------------------------------------- LABORATÓRIO (fusões)
 
 func _build_lab() -> void:
-	var v := _scroll_tab("Laboratório")
+	var v := _scroll_tab("Lab")
 	v.add_child(UIKit.label("Fusões: tenha as duas bolas no nível %d na mesma run." % RunBuild.FUSION_MIN_LEVEL, 16, UIKit.MUTED, 2))
 	for fid in GameData.fusion_ids:
 		var f: Dictionary = GameData.balls[fid]
@@ -302,7 +314,7 @@ func _build_lab() -> void:
 			var cost: int = Save.FUSION_COSTS.get(fid, 100)
 			var on_buy := func():
 				if Save.unlock("fusoes", fid, cost):
-					_rebuild_tab(2)
+					_rebuild_tab(3)
 			var btn := UIKit.button("Pesquisar (%d)" % cost, on_buy, 15)
 			btn.disabled = Save.sucata() < cost
 			item.add_child(btn)
@@ -325,7 +337,7 @@ func _build_arsenal() -> void:
 			var cost := Save.upgrade_cost(uid)
 			var on_buy := func():
 				if Save.buy_upgrade(uid):
-					_rebuild_tab(3)
+					_rebuild_tab(4)
 			var btn := UIKit.button("Melhorar (%d)" % cost, on_buy, 15)
 			btn.disabled = Save.sucata() < cost
 			row.add_child(btn)
@@ -334,7 +346,7 @@ func _build_arsenal() -> void:
 # ---------------------------------------------------------------- RELICÁRIO
 
 func _build_reliquary() -> void:
-	var v := _scroll_tab("Relicário")
+	var v := _scroll_tab("Relíquias")
 	v.add_child(UIKit.label("Relíquias liberadas aparecem nas Feiras durante a run.", 16, UIKit.MUTED, 2))
 	for rid in GameData.relics:
 		var r: Dictionary = GameData.relics[rid]
@@ -350,7 +362,7 @@ func _build_reliquary() -> void:
 			var cost := int(r["custo"])
 			var on_buy := func():
 				if Save.unlock("reliquias", rid, cost):
-					_rebuild_tab(4)
+					_rebuild_tab(5)
 			var btn := UIKit.button("Resgatar (%d)" % cost, on_buy, 15)
 			btn.disabled = Save.sucata() < cost
 			row.add_child(btn)
@@ -377,7 +389,7 @@ func _build_records() -> void:
 	v.add_child(spacer)
 	var on_reset := func():
 		Save.reset()
-		_rebuild_tab(5)
+		_rebuild_tab(6)
 	var reset := UIKit.button("Apagar progresso", on_reset, 14)
 	reset.custom_minimum_size.x = 220
 	v.add_child(reset)

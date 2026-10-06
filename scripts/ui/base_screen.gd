@@ -285,7 +285,7 @@ func _item_row(color: Color, title: String, sub: String, desc: String) -> HBoxCo
 	tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(tv)
 	tv.add_child(UIKit.label(title, 18, UIKit.CREAM, 4))
-	tv.add_child(UIKit.label(sub, 12, UIKit.MUTED, 2))
+	tv.add_child(UIKit.wrap_label(sub, 13, UIKit.MUTED))
 	var d := UIKit.wrap_label(desc, 13)
 	d.custom_minimum_size.x = 200
 	tv.add_child(d)
@@ -295,29 +295,27 @@ func _item_row(color: Color, title: String, sub: String, desc: String) -> HBoxCo
 # ---------------------------------------------------------------- LABORATÓRIO (fusões)
 
 func _build_lab() -> void:
-	var v := _scroll_tab("Lab")
-	v.add_child(UIKit.label("Fusões: tenha as duas bolas no nível %d na mesma run." % RunBuild.FUSION_MIN_LEVEL, 16, UIKit.MUTED, 2))
+	var v := _scroll_tab("Panela")
+	v.add_child(UIKit.label("PANELA DE PRESSÃO", 22, UIKit.GOLD, 4))
+	v.add_child(UIKit.wrap_label("Receitas: tenha as duas bolas no nível %d na mesma run e a receita aparece no level up." % RunBuild.FUSION_MIN_LEVEL, 16, UIKit.MUTED))
 	for fid in GameData.fusion_ids:
 		var f: Dictionary = GameData.balls[fid]
-		var comps: Array = f["componentes"]
-		var row := UIKit.hbox(10)
+		var known: bool = Save.has_fusion(fid)
+		var alts: Array = []
+		for pair in GameData.recipes(fid):
+			alts.append(" + ".join(pair.map(func(id): return String(GameData.balls[id]["nome"]))))
+		var row := _item_row(Color(f["cor"]), f["nome"], GameData.RARITY_NAMES[f["raridade"]] + "  •  " + "  ou  ".join(alts), f["descricao"])
 		v.add_child(row)
-		for i in comps.size():
-			var cb: Dictionary = GameData.balls[comps[i]]
-			row.add_child(UIKit.icon(Color(cb["cor"]), String(cb["nome"]).substr(0, 1), 40.0))
-			row.add_child(UIKit.label("+" if i == 0 else "=", 22, UIKit.GOLD, 4))
-		var item := _item_row(Color(f["cor"]), f["nome"], GameData.RARITY_NAMES[f["raridade"]], f["descricao"])
-		row.add_child(item)
-		if Save.has_fusion(fid):
-			item.add_child(UIKit.label("Pesquisada", 15, UIKit.TEAL, 3))
+		if known:
+			row.add_child(UIKit.label("Pronta", 15, UIKit.TEAL, 3))
 		else:
 			var cost: int = Save.FUSION_COSTS.get(fid, 100)
 			var on_buy := func():
 				if Save.unlock("fusoes", fid, cost):
 					_rebuild_tab(3)
-			var btn := UIKit.button("Pesquisar (%d)" % cost, on_buy, 15)
+			var btn := UIKit.button("Aprender (%d)" % cost, on_buy, 15)
 			btn.disabled = Save.sucata() < cost
-			item.add_child(btn)
+			row.add_child(btn)
 
 
 # ---------------------------------------------------------------- ARSENAL

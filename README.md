@@ -10,7 +10,7 @@
 Uma run completa, jogável do início ao fim, no navegador:
 
 - **3 personagens** com passiva e habilidade: Guardião, Caçadora, Alquimista
-- **12 bolas + 4 fusões**, **15 passivas**, **7 relíquias**, 5 raridades, 3 slots
+- **23 bolas + 9 receitas** do catálogo brasileiro (Onça-Pintada, Pipoca, Saci, Pororoca, Cristo Redentor, Caipirinha…), **15 passivas**, **7 relíquias**, 5 raridades, 3 slots
 - **6 reações elementais** (Vapor, Plasma, Neurotóxica, Sobrecarga, Combustão, Cristal tóxico)
 - **Avenida Paulista** em diorama 2.5D: chuva, neon, ipês, MASP, trânsito que bloqueia bolas
 - **5 inimigos** (Pombo Mecânico, Drone de Entrega, Robô Zona Azul, Fusca Corrompido, Golem de Concreto) + elites
@@ -18,6 +18,8 @@ Uma run completa, jogável do início ao fim, no navegador:
 - Combos (x2 → x3 → x4 → Frenesi), XP, level up "escolha 1 de 3", rerrolagem
 - **Acampamento** com progressão permanente: Oficina, Laboratório, Arsenal, Relicário, Registros e mapa do Brasil
 - Funciona em teclado + mouse e em toque (retrato/paisagem)
+
+Mecânica central (bolsa limitada, matar no peito, tabelinha): ver [checklist Grota Funda](docs/GDD-18-mecanica-central-checklist.md).
 
 Documentação de design em [`docs/`](docs): [GDD geral](docs/GDD-01-geral.md) · [Direção de arte 2.5D](docs/GDD-13-direcao-artistica-2.5D.md) · [Arquitetura](docs/GDD-15-arquitetura-tecnica.md) · [Catálogo de assets](docs/ASSETS.md) · [Roadmap](docs/ROADMAP.md) · [Referências visuais](docs/referencias).
 
@@ -37,7 +39,8 @@ godot --headless --fixed-fps 60 -- --autotest cacadora 420   # IA joga uma run i
 
 | Ação | Teclado/mouse | Toque |
 |---|---|---|
-| Mover | `A` `D` / setas · clique e segure | tocar e arrastar |
+| Mover (X e Y na faixa de defesa) | `WASD` / setas · clique e segure | arrastar o dedo em qualquer lugar |
+| Ligar/desligar chute | `Q` | botão "Chute" |
 | Mirar | mouse (`T` liga a mira automática) | ponto tocado |
 | Habilidade | `Espaço` / botão direito | — |
 | Escolher upgrade | `1` `2` `3` `4` / clique | tocar na carta |

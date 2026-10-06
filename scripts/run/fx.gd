@@ -84,6 +84,18 @@ func column(x: float, from_y: float, to_y: float, color: Color) -> void:
 	_fades.append({"node": n, "mat": m, "life": 0.4, "max": 0.4, "grow": 0.0, "color": Color(color, 0.6)})
 
 
+func row(y: float, color: Color) -> void:
+	var n := MeshInstance3D.new()
+	var bm := BoxMesh.new()
+	bm.size = Vector3(12.0, 0.5, 0.9)
+	n.mesh = bm
+	var m := Models.fade_mat(Color(color, 0.55), 3.0)
+	n.material_override = m
+	n.position = Vector3(0, 0.3, -y)
+	add_child(n)
+	_fades.append({"node": n, "mat": m, "life": 0.35, "max": 0.35, "grow": 0.0, "color": Color(color, 0.55)})
+
+
 func bolt(a: Vector2, b: Vector2, color: Color) -> void:
 	# Raio em zigue-zague: 3 segmentos.
 	var pts: Array = [a]

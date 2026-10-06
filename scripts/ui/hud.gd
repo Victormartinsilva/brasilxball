@@ -19,6 +19,9 @@ var _bottom: VBoxContainer
 var _speed_button: Button
 var _ability_button: Button
 var _aim_button: Button
+var _kick_button: Button
+var _bag_label: Label
+var _kick_shown := true
 var _aim_auto_shown := true
 var _slots_box: HBoxContainer
 var _passives_box: HBoxContainer
@@ -98,8 +101,15 @@ func setup(the_run: Run) -> void:
 	_aim_button.custom_minimum_size = Vector2(128, 52)
 	_root.add_child(_aim_button)
 
+	_kick_button = UIKit.button("", func(): run.toggle_kick(), 16)
+	_kick_button.focus_mode = Control.FOCUS_NONE
+	_kick_button.custom_minimum_size = Vector2(128, 52)
+	_root.add_child(_kick_button)
+
 	_bottom = UIKit.vbox(6)
 	_root.add_child(_bottom)
+	_bag_label = UIKit.label("", 17, UIKit.CREAM, 4)
+	_bottom.add_child(_bag_label)
 	_passives_box = UIKit.hbox(4)
 	_bottom.add_child(_passives_box)
 	_slots_box = UIKit.hbox(8)
@@ -143,13 +153,15 @@ func _layout() -> void:
 	if portrait:
 		UIKit.place(_ability_button, Vector2(1, 1), Vector2(-136, -196), Vector2(120, 120))
 		UIKit.place(_aim_button, Vector2(1, 1), Vector2(-140, -258), Vector2(128, 52))
-		UIKit.place(_bottom, Vector2(0, 1), Vector2(12, -150), Vector2(0, 116))
+		UIKit.place(_kick_button, Vector2(1, 1), Vector2(-140, -318), Vector2(128, 52))
+		UIKit.place(_bottom, Vector2(0, 1), Vector2(12, -176), Vector2(0, 140))
 		UIKit.place(_banner, Vector2(0.5, 0.5), Vector2(-w * 0.5, -220), Vector2(w, 0))
 		UIKit.place(_toast_box, Vector2(0.5, 1), Vector2(-w * 0.5, -270), Vector2(w, 0))
 	else:
 		UIKit.place(_ability_button, Vector2(0, 1), Vector2(10, -200), Vector2(128, 128))
 		UIKit.place(_aim_button, Vector2(0, 0), Vector2(16, 76), Vector2(128, 44))
-		UIKit.place(_bottom, Vector2(0, 1), Vector2(150, -140), Vector2(0, 110))
+		UIKit.place(_kick_button, Vector2(0, 0), Vector2(16, 132), Vector2(128, 44))
+		UIKit.place(_bottom, Vector2(0, 1), Vector2(150, -166), Vector2(0, 136))
 		UIKit.place(_banner, Vector2(0.5, 0.5), Vector2(-450, -190), Vector2(900, 0))
 		UIKit.place(_toast_box, Vector2(0.5, 1), Vector2(-350, -160), Vector2(700, 0))
 	_refresh_aim_label()
@@ -162,6 +174,7 @@ func _toggle_aim() -> void:
 
 func _refresh_aim_label() -> void:
 	_aim_button.text = "Mira: AUTO" if run.auto_aim else "Mira: LIVRE"
+	_kick_button.text = "Chute: AUTO" if run.auto_kick else "Chute: PARADO"
 
 
 func _process(delta: float) -> void:
@@ -181,9 +194,13 @@ func _process(delta: float) -> void:
 	if _banner_time > 0.0:
 		_banner_time -= real_delta
 		_banner.modulate.a = clampf(_banner_time * 2.0, 0.0, 1.0)
-	if _aim_auto_shown != run.auto_aim:
+	if _aim_auto_shown != run.auto_aim or _kick_shown != run.auto_kick:
 		_aim_auto_shown = run.auto_aim
+		_kick_shown = run.auto_kick
 		_refresh_aim_label()
+	var in_bag := run.bag.size()
+	_bag_label.text = "Bolsa %d / %d" % [in_bag, run.bag_total()]
+	_bag_label.modulate = Color("#ff6b3d") if in_bag == 0 else Color.WHITE
 	_refresh_build()
 	_draw_layer.queue_redraw()
 

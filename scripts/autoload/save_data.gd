@@ -14,7 +14,11 @@ const UPGRADES := {
 }
 
 ## Fusões liberadas no Laboratório. As duas primeiras já vêm liberadas.
-const FUSION_COSTS := {"termodinamica": 0, "plasma": 0, "neurotoxica": 80, "singularidade": 120}
+const FUSION_COSTS := {
+	"termodinamica": 0, "plasma": 0, "bomba_sao_joao": 0,
+	"neurotoxica": 80, "minuano": 70, "fumace": 70, "peixeira": 70,
+	"cristo_redentor": 120, "singularidade": 120,
+}
 
 var data: Dictionary = {}
 
@@ -61,6 +65,16 @@ func load_game() -> void:
 	if typeof(parsed) != TYPE_DICTIONARY:
 		return
 	_merge(data, parsed)
+	_migrate()
+
+
+## Conteúdo novo marcado como inicial entra em saves antigos sem apagar o progresso.
+func _migrate() -> void:
+	var fresh := default_data()
+	for key in ["bolas", "reliquias", "fusoes"]:
+		for id in fresh[key]:
+			if not data[key].has(id):
+				data[key].append(id)
 
 
 func _merge(base: Dictionary, incoming: Dictionary) -> void:

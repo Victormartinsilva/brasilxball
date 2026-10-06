@@ -9,7 +9,7 @@
     "eventos_feira": [100, 210],
     "velocidade_descida": [0.24, 0.42],
     "preenchimento": [0.38, 0.78],
-    "escala_hp": [1.0, 3.2],
+    "escala_hp": [1.0, 3.6],
     "chance_elite": 0.035,
     "fases": [
       {"t": 0,   "pool": {"pombo": 5, "drone": 2}},
@@ -19,7 +19,7 @@
       {"t": 230, "pool": {"pombo": 1, "drone": 3, "robo": 3, "fusca": 2, "concreto": 3}}
     ],
     "transito": {"inicio": 60, "intervalo": [9, 5], "faixa_y": 5.5},
-    "chefe": {"id": "arranha_ceu", "nome": "O Arranha-Céu", "hp": 16000,
+    "chefe": {"id": "arranha_ceu", "nome": "O Arranha-Céu", "hp": 18000,
       "fala": "Você realmente achou que isso aqui era visita turística?"},
     "mapa": {"x": 0.62, "y": 0.70}
   },

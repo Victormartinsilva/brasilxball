@@ -86,6 +86,16 @@ func is_fusion(ball_id: String) -> bool:
 	return balls.get(ball_id, {}).has("componentes")
 
 
+## Receitas de uma bola de fusão: lista de pares alternativos [[a, b], [c, d]].
+func recipes(ball_id: String) -> Array:
+	var c: Array = balls.get(ball_id, {}).get("componentes", [])
+	if c.is_empty():
+		return []
+	if typeof(c[0]) == TYPE_STRING:
+		return [c]
+	return c
+
+
 func rarity_color(r: String) -> Color:
 	return RARITY_COLORS.get(r, Color.WHITE)
 
@@ -113,6 +123,9 @@ func passive_value(id: String, level: int) -> float:
 func _setup_input() -> void:
 	_add_keys("move_left", [KEY_A, KEY_LEFT])
 	_add_keys("move_right", [KEY_D, KEY_RIGHT])
+	_add_keys("move_up", [KEY_W, KEY_UP])
+	_add_keys("move_down", [KEY_S, KEY_DOWN])
+	_add_keys("kick_toggle", [KEY_Q])
 	_add_keys("ability", [KEY_SPACE, KEY_E])
 	_add_keys("pause", [KEY_ESCAPE, KEY_P])
 	_add_keys("speed_toggle", [KEY_TAB])

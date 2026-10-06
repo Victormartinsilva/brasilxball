@@ -24,7 +24,9 @@ var bounces := 0              # ricochetes totais (paredes + inimigos) — passi
 var returning := false
 var dead := false
 var is_clone := false
-var lifetime := 14.0
+var lifetime := 25.0          # segurança: se ficar presa, volta sozinha
+var bag_id := ""             # "" = bola temporária (clone, rajada…); senão volta para a bolsa
+var suspiro_done := false
 var last_hit_id := 0
 var last_hit_time := -1.0
 var hit_ids: Dictionary = {}  # para bolas que atravessam (fantasma/bumerangue de volta)
@@ -33,6 +35,10 @@ var attached: Node = null     # Parasita
 var attach_timer := 0.0
 var attach_offset := Vector2.ZERO
 var color := Color.WHITE
+var stone_mult := 3.0        # Paralelepípedo
+var hits := 0
+var dribbles := 0
+var spawn_cd := 0.0          # Pipoca
 
 var _core: MeshInstance3D
 var _trail: Array = []
@@ -56,8 +62,6 @@ func setup(stats: Dictionary, start: Vector2, direction: Vector2) -> void:
 	level = stats["nivel"]
 	tags = stats["tags"]
 	color = stats["cor"]
-	if behavior == "fantasma":
-		lifetime = 5.0 + level * 0.5
 	_build_visual()
 	_sync()
 

@@ -143,8 +143,24 @@ func add_ball(ball_id: String) -> void:
 	slots.append({"id": ball_id, "level": 1, "timer": 0.3 + slots.size() * 0.25, "queue": 0, "queue_timer": 0.0})
 
 
+## Primeira receita (par de bolas) que a build atual consegue preparar na Panela de Pressão.
+func matching_recipe(fusion_id: String) -> Array:
+	for pair in GameData.recipes(fusion_id):
+		var ok := true
+		for c in pair:
+			var i := slot_index(c)
+			if i < 0 or int(slots[i]["level"]) < FUSION_MIN_LEVEL:
+				ok = false
+				break
+		if ok:
+			return pair
+	return []
+
+
 func fuse(fusion_id: String) -> void:
-	var comps: Array = GameData.balls[fusion_id]["componentes"]
+	var comps: Array = matching_recipe(fusion_id)
+	if comps.is_empty():
+		return
 	var ia := slot_index(comps[0])
 	var ib := slot_index(comps[1])
 	var lvl := maxi(slots[ia]["level"], slots[ib]["level"]) - 1
@@ -155,12 +171,7 @@ func fuse(fusion_id: String) -> void:
 func can_fuse(fusion_id: String) -> bool:
 	if not Save.has_fusion(fusion_id):
 		return false
-	var comps: Array = GameData.balls[fusion_id]["componentes"]
-	for c in comps:
-		var i := slot_index(c)
-		if i < 0 or int(slots[i]["level"]) < FUSION_MIN_LEVEL:
-			return false
-	return true
+	return not matching_recipe(fusion_id).is_empty()
 
 
 func apply_offer(offer: Dictionary) -> void:

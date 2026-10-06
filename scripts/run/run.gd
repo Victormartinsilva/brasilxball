@@ -12,6 +12,9 @@ const SPAWN_Y := 17.4
 const COLS := 11
 const ENEMY_LINE := 0.9
 const MAX_BALLS := 150
+const KICK_INTERVAL := 0.22   # intervalo entre chutes com a bolsa cheia
+const CATCH_RADIUS := 0.9     # "matar no peito"
+const BABY_ID := "__gude"      # bolinhas de gude da Torcida (dentes-de-leite)
 const COMBO_TIERS := [[100, "FRENESI", 1.5, 40], [50, "x4", 1.3, 20], [25, "x3", 1.2, 10], [10, "x2", 1.1, 5]]
 const REACTIONS := {
 	"fogo+gelo": {"nome": "VAPOR", "cor": "#ffd0f0"},
@@ -77,7 +80,7 @@ var aim_point := Vector2(0, 10)
 var mouse_held := false
 var touch_mode := false
 var _touch_start_ground := Vector2.ZERO
-var _touch_start_player := 0.0
+var _touch_start_player := Vector2.ZERO
 
 var _row_progress := 0.0
 var _shake := 0.0
@@ -87,6 +90,14 @@ var _cam_offset_target := Vector3.ZERO
 var _rajada_queue := 0
 var _rajada_timer := 0.0
 var _gem_mesh: Mesh
+var _acai_hits := 0
+
+# Bolsa: as bolas são LIMITADAS. Só voltam quando descem até a linha de baixo ou são pegas no peito.
+var bag: Array = []
+var auto_kick := true
+var kick_timer := 0.0
+var catches := 0
+var rerolls_paid := 0
 
 
 func setup(char_id: String, region_id: String) -> void:
@@ -134,6 +145,7 @@ func _ready() -> void:
 	add_child(levelup)
 	levelup.chosen.connect(_on_offer_chosen)
 
+	_sync_bag()
 	for i in 4:
 		_spawn_row(SPAWN_Y - i * 1.0, 0.0)
 	hud.banner(region["nome"].to_upper(), region.get("subtitulo", ""), 2.5)
@@ -190,8 +202,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.index == 0:
 			if event.pressed:
 				_touch_start_ground = _screen_to_ground(event.position)
-				_touch_start_player = player.pos.x
+				_touch_start_player = player.pos
 				player.target_x = player.pos.x
+				player.target_y = player.pos.y
 				player.use_target = true
 			else:
 				player.use_target = false
@@ -200,7 +213,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		touch_mode = true
 		if event.index == 0:
 			var g := _screen_to_ground(event.position)
-			player.target_x = clampf(_touch_start_player + (g.x - _touch_start_ground.x) * 1.35, -Player.LIMIT, Player.LIMIT)
+			var t := _touch_start_player + (g - _touch_start_ground) * 1.35
+			player.target_x = clampf(t.x, -Player.LIMIT, Player.LIMIT)
+			player.target_y = clampf(t.y, Player.Y, Player.Y_MAX)
 			player.use_target = true
 			if not auto_aim:
 				aim_point = g
@@ -212,12 +227,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		aim_point = _screen_to_ground(event.position)
 		if mouse_held:
 			player.target_x = aim_point.x
+			player.target_y = clampf(aim_point.y, Player.Y, Player.Y_MAX)
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		mouse_held = event.pressed
 		player.use_target = event.pressed
 		auto_aim = false
 		aim_point = _screen_to_ground(event.position)
 		player.target_x = aim_point.x
+		player.target_y = clampf(aim_point.y, Player.Y, Player.Y_MAX)
 	elif event is InputEventKey and event.pressed and event.physical_keycode == KEY_T:
 		auto_aim = not auto_aim
 		hud.toast("Mira automática: " + ("LIGADA" if auto_aim else "DESLIGADA"))
@@ -227,6 +244,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		hud.toggle_pause()
 	if event.is_action_pressed("speed_toggle"):
 		hud.cycle_speed()
+	if event.is_action_pressed("kick_toggle"):
+		toggle_kick()
 
 
 func _screen_to_ground(sp: Vector2) -> Vector2:
@@ -240,9 +259,11 @@ func _screen_to_ground(sp: Vector2) -> Vector2:
 
 
 func _update_aim(delta: float) -> void:
-	var axis := Input.get_axis("move_left", "move_right")
+	var axis := Vector2(Input.get_axis("move_left", "move_right"), Input.get_axis("move_down", "move_up"))
 	if autoplay:
 		axis = _autoplay_axis()
+	# Chutar deixa o personagem mais lento — às vezes vale parar de chutar para correr.
+	player.speed_mult = 0.6 if (auto_kick and bag.size() > 0 and character["id"] != "cacadora") else 1.0
 	player.move(axis, delta)
 	var target := aim_point
 	if auto_aim or autoplay:
@@ -274,18 +295,21 @@ func _auto_target() -> Vector2:
 	return Vector2(player.pos.x, 10)
 
 
-func _autoplay_axis() -> float:
-	# IA simples para testes: foge de estilhaços, persegue gemas.
+func _autoplay_axis() -> Vector2:
+	# IA simples para testes: foge de estilhaços, tenta matar no peito, senão encara a ameaça.
 	for s in shards:
 		if absf(s["pos"].x - player.pos.x) < 1.2:
-			return 1.0 if s["pos"].x < player.pos.x else -1.0
+			return Vector2(1.0 if s["pos"].x < player.pos.x else -1.0, 0)
+	for b: Ball in balls:
+		if b.bag_id != "" and not b.dead and b.dir.y < 0.0 and b.pos.y < 4.0:
+			return (b.pos - player.pos).normalized()
 	var goal := 0.0
 	var best_y := 999.0
 	for e: Enemy in enemies:
 		if not e.dead and e.pos.y < best_y:
 			best_y = e.pos.y
 			goal = e.pos.x
-	return clampf((goal - player.pos.x) * 0.5, -1.0, 1.0)
+	return Vector2(clampf((goal - player.pos.x) * 0.5, -1.0, 1.0), -1.0)
 
 
 # =================================================================== SPAWN
@@ -384,19 +408,15 @@ func spawn_enemy(eid: String, at: Vector2, elite := false) -> Enemy:
 # =================================================================== DISPARO
 
 func _fire(delta: float) -> void:
-	for s in build.slots:
-		var stats := build.ball_stats(s["id"], s["level"])
-		s["timer"] -= delta
-		if s["timer"] <= 0.0:
-			s["timer"] = stats["cooldown"]
-			s["queue"] += stats["quantidade"]
-		if s["queue"] > 0:
-			s["queue_timer"] -= delta
-			if s["queue_timer"] <= 0.0:
-				s["queue_timer"] = 0.07
-				s["queue"] -= 1
-				var spread := rng.randf_range(-0.06, 0.06)
-				spawn_ball(stats, player.pos + Vector2(0, 0.6), player.aim_dir.rotated(spread))
+	kick_timer -= delta
+	if auto_kick and kick_timer <= 0.0 and bag.size() > 0 and balls.size() < MAX_BALLS:
+		kick_timer = KICK_INTERVAL / build.fire_rate_mult()
+		var id: String = bag.pop_front()
+		var b := spawn_ball(_bag_stats(id), player.pos + Vector2(0, 0.5), player.aim_dir.rotated(rng.randf_range(-0.03, 0.03)))
+		if b:
+			b.bag_id = id
+		else:
+			bag.push_front(id)
 	if _rajada_queue > 0:
 		_rajada_timer -= delta
 		if _rajada_timer <= 0.0:
@@ -409,6 +429,63 @@ func _fire(delta: float) -> void:
 			stats["ricochetes"] = 3
 			var ang := lerpf(-0.6, 0.6, i / 13.0)
 			spawn_ball(stats, player.pos + Vector2(0, 0.6), player.aim_dir.rotated(ang))
+
+
+## Stats da bola que sai da bolsa (bola especial do slot ou bolinha de gude da Torcida).
+func _bag_stats(id: String) -> Dictionary:
+	if id == BABY_ID:
+		var s := build.ball_stats("pedra", 1)
+		s["nome"] = "Bolinha de Gude"
+		s["tamanho"] *= 0.72
+		s["dano"] *= 0.55
+		s["cor"] = Color("#9fd8ff")
+		return s
+	var i := build.slot_index(id)
+	return build.ball_stats(id, int(build.slots[i]["level"]) if i >= 0 else 1)
+
+
+## Reconcilia a bolsa com a build: novas bolas entram, bolas fundidas saem.
+func _sync_bag() -> void:
+	var desired := {BABY_ID: int(character.get("torcida", 4))}
+	for s in build.slots:
+		desired[s["id"]] = int(build.ball_stats(s["id"], s["level"])["quantidade"])
+	var owned := {}
+	for id in bag:
+		owned[id] = int(owned.get(id, 0)) + 1
+	for b: Ball in balls:
+		if b.bag_id != "" and not b.dead:
+			owned[b.bag_id] = int(owned.get(b.bag_id, 0)) + 1
+	for id in owned:
+		var extra: int = int(owned[id]) - int(desired.get(id, 0))
+		while extra > 0 and bag.has(id):
+			bag.erase(id)
+			extra -= 1
+		for b: Ball in balls:
+			if extra <= 0:
+				break
+			if b.bag_id == id:
+				b.bag_id = ""  # vira temporária e some quando descer
+				extra -= 1
+	for id in desired:
+		for k in int(desired[id]) - int(owned.get(id, 0)):
+			bag.push_front(id)  # bola nova sai no próximo chute
+
+
+func bag_total() -> int:
+	var n := bag.size()
+	for b: Ball in balls:
+		if b.bag_id != "" and not b.dead:
+			n += 1
+	return n
+
+
+func toggle_kick() -> void:
+	auto_kick = not auto_kick
+	hud.toast("Chute automático " + ("LIGADO" if auto_kick else "DESLIGADO — correndo mais rápido"))
+
+
+func reroll_cost() -> int:
+	return 5 * (rerolls_paid + 1)
 
 
 func spawn_ball(stats: Dictionary, at: Vector2, dir: Vector2, clone := false) -> Ball:
@@ -440,11 +517,15 @@ func _update_balls(delta: float) -> void:
 
 func _step_ball(b: Ball, delta: float, smult: float) -> void:
 	b.age += delta
+	b.spawn_cd -= delta
 	if b.attached != null:
 		_update_parasite(b, delta)
 		return
 	if b.age > b.lifetime and not b.returning:
-		_start_return(b)
+		if b.bag_id == "":
+			b.dead = true
+			return
+		_start_return(b, false)
 	for f in fields:
 		var to_c: Vector2 = f["pos"] - b.pos
 		var dist := to_c.length()
@@ -463,6 +544,15 @@ func _step_ball(b: Ball, delta: float, smult: float) -> void:
 		b.pos += b.dir * step_len
 		_ball_walls(b)
 		if b.dead:
+			return
+		# Matar no peito: pegar a bola descendo antes de cair = recarga imediata.
+		if b.bag_id != "" and b.dir.y < 0.0 and b.age > 0.35 and b.pos.y < player.pos.y + 1.3 \
+				and b.pos.distance_to(player.pos + Vector2(0, 0.4)) < CATCH_RADIUS:
+			catches += 1
+			fx.sparks(b.pos, Color("#fff3c4"), 5, 3.0)
+			if catches % 6 == 1:
+				fx.text(player.pos + Vector2(0, 1.4), "MATOU NO PEITO!", Color("#5fe0a0"), 0.006)
+			_ball_returned(b)
 			return
 		if b.returning:
 			if b.behavior == "bumerangue":
@@ -501,6 +591,14 @@ func _on_bounce(b: Ball) -> void:
 	b.dir = b.dir.rotated(rng.randf_range(-0.035, 0.035)).normalized()
 
 
+## A bola NÃO volta ao esgotar os ricochetes (ela só volta descendo). "Último Suspiro" explode uma vez.
+func _ricochetes_spent(b: Ball) -> void:
+	if b.suspiro_done or build.passive("ultimo_suspiro") <= 0:
+		return
+	b.suspiro_done = true
+	aoe(b.pos, 1.3, b.damage * build.pval("ultimo_suspiro") / 100.0, b.color, null, false)
+
+
 func _start_return(b: Ball, explode := true) -> void:
 	if b.returning:
 		return
@@ -510,7 +608,11 @@ func _start_return(b: Ball, explode := true) -> void:
 
 
 func _ball_returned(b: Ball) -> void:
+	if b.dead:
+		return
 	b.dead = true
+	if b.bag_id != "":
+		bag.append(b.bag_id)
 	if character["id"] == "guardiao" and ability_time > 0.0:
 		var dmg := 22.0 * build.damage_mult() * (1.0 + level * 0.06)
 		fx.column(b.pos.x, 0.5, TOP, Color("#e8b04a"))
@@ -562,19 +664,20 @@ func _ball_enemies(b: Ball, passive_only: bool) -> void:
 		else:
 			n = diff / sqrt(d2)
 
-		var ghost := passive_only or b.behavior == "fantasma" or b.pierce_left > 0
+		var ghost := passive_only or b.behavior in ["fantasma", "saci", "fumace"] or b.pierce_left > 0
 		if ghost:
 			if b.hit_ids.has(eid):
 				continue
 			b.hit_ids[eid] = true
 			ball_hit(b, e, closest)
+			if b.dead:
+				return
 			if passive_only:
 				continue
-			if b.behavior == "fantasma":
+			if b.behavior in ["fantasma", "saci", "fumace"]:
 				b.ricochetes_left -= 1
 				if b.ricochetes_left <= 0:
-					_start_return(b)
-					return
+					_ricochetes_spent(b)
 			else:
 				b.pierce_left -= 1
 			continue
@@ -585,6 +688,8 @@ func _ball_enemies(b: Ball, passive_only: bool) -> void:
 		b.last_hit_id = eid
 		b.last_hit_time = b.age
 		var passed := ball_hit(b, e, closest)
+		if b.dead:
+			return
 		if b.behavior == "parasita" and not e.dead and not e.is_boss:
 			b.attached = e
 			b.attach_timer = 1.4
@@ -598,7 +703,7 @@ func _ball_enemies(b: Ball, passive_only: bool) -> void:
 		_on_bounce(b)
 		b.ricochetes_left -= 1
 		if b.ricochetes_left <= 0:
-			_start_return(b)
+			_ricochetes_spent(b)
 		return
 
 
@@ -640,6 +745,19 @@ func ball_hit(b: Ball, e: Enemy, contact: Vector2) -> bool:
 		elif not b.marked_first:
 			b.marked_first = true
 			e.marked = true
+	match b.behavior:
+		"saci":
+			dmg *= 0.75
+		"mau_olhado":
+			dmg *= 3.0
+		"paralelepipedo":
+			dmg *= b.stone_mult
+			b.stone_mult = maxf(0.5, b.stone_mult * 0.6)
+		"futebol":
+			dmg *= 1.0 + 0.15 * b.dribbles
+	if e.scratch_stacks > 0:
+		dmg += e.scratch_stacks * 1.6 * _hp_scale_soft()  # Arranhão: todo golpe dói mais
+	b.hits += 1
 	var elements: Array = b.elements
 	if b.behavior == "espelho":
 		if e.last_element != "":
@@ -664,9 +782,101 @@ func ball_hit(b: Ball, e: Enemy, contact: Vector2) -> bool:
 			_spawn_field(contact, b)
 		"plasma", "neurotoxica":
 			pass  # tratados pelo raio
+		_:
+			if _brazil_behavior(b, e, dmg):
+				return true
 	if b.behavior == "pesada" and e.dead and not e.is_boss:
 		return true
 	return false
+
+
+func _hp_scale_soft() -> float:
+	return sqrt(_hp_scale())
+
+
+## Comportamentos do catálogo brasileiro (docs/GDD-03). Retorna true se a bola deve atravessar.
+func _brazil_behavior(b: Ball, e: Enemy, dmg: float) -> bool:
+	match b.behavior:
+		"onca":
+			if not e.dead:
+				e.scratch_stacks = mini(e.scratch_stacks + 2, 8)
+		"peixeira":
+			if not e.dead:
+				e.scratch_stacks = mini(e.scratch_stacks + 3, 15)
+				if e.scratch_stacks >= 12:
+					e.scratch_stacks = 0
+					fx.text(e.pos, "PEIXEIRA!", Color("#f3e3c3"), 0.006)
+					deal_damage(e, e.hp * (0.05 if e.is_boss else 0.2), true, b.color)
+		"pipoca":
+			if b.spawn_cd <= 0.0:
+				b.spawn_cd = 3.0
+				var gude := build.ball_stats("pedra", 1)
+				gude["tamanho"] *= 0.7
+				gude["dano"] *= 0.6 * (1.0 + 0.25 * (b.level - 1))
+				gude["ricochetes"] = 3
+				for i in rng.randi_range(2, 4):
+					spawn_ball(gude, e.pos + Vector2(0, -0.6), Vector2(rng.randf_range(-1, 1), rng.randf_range(-1.0, -0.2)).normalized(), true)
+				fx.sparks(e.pos, Color("#fff3c4"), 8, 4.0)
+		"zabumba":
+			aoe(e.pos, 1.5, dmg * 0.6, b.color, e, false)
+		"pororoca":
+			_hit_line(e, true, false, dmg * 0.8, b.color)
+		"cachoeira":
+			_hit_line(e, false, true, dmg * 0.8, b.color)
+		"cristo":
+			_hit_line(e, true, true, dmg, b.color)
+		"mau_olhado":
+			fx.sparks(e.pos, b.color, 10, 5.0)
+			_ball_returned(b)  # se desfaz ao acertar e volta direto para a bolsa
+		"saci":
+			e.slow_time = 5.0
+		"fumace":
+			fx.ring(e.pos, 2.0, b.color)
+			for o: Enemy in enemies:
+				if not o.dead and o.pos.distance_to(e.pos) <= 2.0:
+					o.poison_stacks = mini(o.poison_stacks + 3, 14)
+					o.poison_time = 4.0
+					o.poison_dps_per_stack = maxf(o.poison_dps_per_stack, dmg * 0.12)
+		"minuano":
+			fx.ring(e.pos, 2.0, Color("#cfeeff"))
+			for o: Enemy in enemies:
+				if not o.dead and not o.is_boss and o.pos.distance_to(e.pos) <= 2.0:
+					o.frozen_time = maxf(o.frozen_time, 0.8 + 0.1 * b.level)
+		"bomba":
+			aoe(e.pos, 2.0, dmg * 2.0, Color("#ff9f2e"), e, true)
+			shake(0.12)
+		"acai":
+			_acai_hits += 1
+			if _acai_hits >= 10:
+				_acai_hits = 0
+				heal(3.0)
+				fx.text(player.pos + Vector2(0, 1), "+3", Color("#b46bff"), 0.006)
+		"morcego":
+			if rng.randf() < 0.05:
+				heal(2.0)
+				fx.text(player.pos + Vector2(0, 1), "+2", Color("#ff6b8a"), 0.006)
+		"futebol":
+			if not e.dead and not e.is_boss and rng.randf() < 0.25:
+				b.dribbles += 1
+				if rng.randf() < 0.4:
+					fx.text(e.pos, "DRIBLE!", Color("#f3f3ee"), 0.006)
+				return true
+	return false
+
+
+## Pororoca (linha), Cachoeira (coluna) e Cristo Redentor (as duas).
+func _hit_line(e: Enemy, row: bool, col: bool, dmg: float, color: Color) -> void:
+	if row:
+		fx.row(e.pos.y, color)
+	if col:
+		fx.column(e.pos.x, 0.5, TOP, color)
+	for o: Enemy in enemies.duplicate():
+		if o == e or o.dead:
+			continue
+		var in_row := row and absf(o.pos.y - e.pos.y) < 0.55
+		var in_col := col and absf(o.pos.x - e.pos.x) < o.half.x + 0.3
+		if in_row or in_col:
+			deal_damage(o, dmg, false, color)
 
 
 func deal_damage(e: Enemy, amount: float, crit := false, color := Color(1.0, 0.95, 0.84), source: Ball = null, elemental := false, show := true) -> float:
@@ -936,7 +1146,10 @@ func _update_enemies(delta: float) -> void:
 			if e.shoot_timer <= 0.0:
 				e.shoot_timer = rng.randf_range(4.5, 7.5)
 				_enemy_shoot(e)
+		_update_melee(e, delta)
 		if e.pos.y - e.half.y <= ENEMY_LINE:
+			# Invasão: o inimigo atravessou a linha e entrou na vila.
+			hud.toast("Invadiram a vila!")
 			damage_player(e.contact_damage)
 			fx.explosion(e.pos, 1.0, Color("#ff3d1f"))
 			e.dead = true
@@ -944,6 +1157,23 @@ func _update_enemies(delta: float) -> void:
 		e.sync_visual()
 		e.animate(delta)
 		e.update_status_visual()
+
+
+## Ataque corpo a corpo: perto do personagem, o inimigo mostra o olho gordo 👁 e golpeia após 0,9s.
+func _update_melee(e: Enemy, delta: float) -> void:
+	e.melee_cd = maxf(0.0, e.melee_cd - delta)
+	var near := absf(e.pos.x - player.pos.x) < e.half.x + 0.75 and (e.pos.y - e.half.y) - player.pos.y < 1.4
+	if e.melee_timer > 0.0:
+		e.melee_timer -= delta
+		e.show_eye(true)
+		if e.melee_timer <= 0.0:
+			e.show_eye(false)
+			e.melee_cd = 2.5
+			if near:
+				fx.ring(player.pos, 1.0, Color("#ff3d1f"))
+				damage_player(e.contact_damage * 0.6)
+	elif near and e.melee_cd <= 0.0 and e.frozen_time <= 0.0:
+		e.melee_timer = 0.9
 
 
 func _tick_status(e: Enemy, delta: float) -> void:
@@ -964,6 +1194,8 @@ func _tick_status(e: Enemy, delta: float) -> void:
 			e.chill_stacks = 0
 	if e.frozen_time > 0.0:
 		e.frozen_time -= delta
+	if e.slow_time > 0.0:
+		e.slow_time -= delta
 	for k in e.recent.keys():
 		e.recent[k] = float(e.recent[k]) - delta
 		if float(e.recent[k]) <= 0.0:
@@ -1156,10 +1388,11 @@ func _on_offer_chosen(offer: Dictionary, context: String) -> void:
 			max_hp = float(character["vida"]) + build.max_hp_bonus()
 			heal(max_hp - before)
 		if offer["tipo"] == "fusao":
-			hud.banner("FUSÃO!", offer["nome"], 2.0)
+			hud.banner("RECEITA!", "Panela de Pressão: " + String(offer["nome"]), 2.2)
 			fx.explosion(player.pos + Vector2(0, 1.0), 2.0, offer["cor"])
 			if not descobertas.has(offer["id"]):
 				descobertas.append(offer["id"])
+	_sync_bag()
 	if context == "feira":
 		hud.toast("\"Preço bom eu não garanto. Mas barato também não.\"")
 

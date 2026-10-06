@@ -1,178 +1,839 @@
 [
   {
     "id": "pedra",
-    "nome": "Bola de Pedra",
-    "descricao": "A bola básica. Dano médio, velocidade média, comportamento previsível.",
+    "nome": "Bolinha de Gude",
+    "descricao": "A bolinha comum. Dano médio, comportamento previsível.",
     "raridade": "comum",
-    "dano": 10, "velocidade": 16, "tamanho": 1.0, "ricochetes": 6, "piercing": 0,
-    "quantidade": 1, "cooldown": 0.85, "critico": 0.05,
-    "elementos": [], "comportamento": "basico",
-    "tags": ["fisica", "ricochete"],
-    "cor": "#c9b79c", "inicial": true, "custo": 0
+    "dano": 10,
+    "velocidade": 16,
+    "tamanho": 1.0,
+    "ricochetes": 6,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 0.85,
+    "critico": 0.05,
+    "elementos": [],
+    "comportamento": "basico",
+    "tags": [
+      "fisica",
+      "ricochete"
+    ],
+    "cor": "#c9b79c",
+    "inicial": true,
+    "custo": 0
   },
   {
     "id": "ferro",
-    "nome": "Bola de Ferro",
-    "descricao": "Pesada. Alto dano, poucos ricochetes. Atravessa inimigos que ela mata.",
+    "nome": "Tatu-Bola",
+    "descricao": "Pesada: muito dano, mais lenta, poucos ricochetes. Atravessa quem ela mata.",
     "raridade": "comum",
-    "dano": 24, "velocidade": 11, "tamanho": 1.3, "ricochetes": 3, "piercing": 0,
-    "quantidade": 1, "cooldown": 1.5, "critico": 0.03,
-    "elementos": [], "comportamento": "pesada",
-    "tags": ["fisica", "pesada"],
-    "cor": "#7d8a96", "inicial": true, "custo": 0
+    "dano": 24,
+    "velocidade": 11,
+    "tamanho": 1.3,
+    "ricochetes": 3,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 1.5,
+    "critico": 0.03,
+    "elementos": [],
+    "comportamento": "pesada",
+    "tags": [
+      "fisica",
+      "pesada"
+    ],
+    "cor": "#7d8a96",
+    "inicial": true,
+    "custo": 0
   },
   {
     "id": "brasa",
-    "nome": "Brasa",
-    "descricao": "Aplica queimadura. Inimigo queimado que morre cria uma pequena área de fogo.",
+    "nome": "Pimenta Malagueta",
+    "descricao": "Aplica ARDÊNCIA (dano por segundo). Inimigo ardendo que morre espalha o fogo.",
     "raridade": "incomum",
-    "dano": 8, "velocidade": 15, "tamanho": 1.0, "ricochetes": 5, "piercing": 0,
-    "quantidade": 1, "cooldown": 0.95, "critico": 0.05,
-    "elementos": ["fogo"], "comportamento": "basico",
-    "tags": ["elemental", "fogo", "area", "dot"],
-    "cor": "#ff7a1f", "inicial": true, "custo": 0
+    "dano": 8,
+    "velocidade": 15,
+    "tamanho": 1.0,
+    "ricochetes": 5,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 0.95,
+    "critico": 0.05,
+    "elementos": [
+      "fogo"
+    ],
+    "comportamento": "basico",
+    "tags": [
+      "elemental",
+      "fogo",
+      "area",
+      "dot"
+    ],
+    "cor": "#ff7a1f",
+    "inicial": true,
+    "custo": 0
   },
   {
     "id": "glacial",
-    "nome": "Glacial",
-    "descricao": "Reduz a velocidade dos inimigos. Três acertos seguidos congelam o alvo.",
+    "nome": "Geada",
+    "descricao": "Geada do Sul: desacelera; três acertos seguidos CONGELAM o alvo (+20% de dano).",
     "raridade": "incomum",
-    "dano": 7, "velocidade": 14, "tamanho": 1.0, "ricochetes": 5, "piercing": 0,
-    "quantidade": 1, "cooldown": 0.95, "critico": 0.05,
-    "elementos": ["gelo"], "comportamento": "basico",
-    "tags": ["elemental", "gelo", "controle"],
-    "cor": "#7fe3ff", "inicial": true, "custo": 0
+    "dano": 7,
+    "velocidade": 14,
+    "tamanho": 1.0,
+    "ricochetes": 5,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 0.95,
+    "critico": 0.05,
+    "elementos": [
+      "gelo"
+    ],
+    "comportamento": "basico",
+    "tags": [
+      "elemental",
+      "gelo",
+      "controle"
+    ],
+    "cor": "#7fe3ff",
+    "inicial": true,
+    "custo": 0
   },
   {
     "id": "arco",
-    "nome": "Arco",
-    "descricao": "Elétrica. Ao acertar, salta para inimigos próximos (1 → 2 → 4 → 8 alvos).",
+    "nome": "Trovoada",
+    "descricao": "Raio que salta para inimigos próximos (1 → 2 → 4 → 8 alvos).",
     "raridade": "rara",
-    "dano": 7, "velocidade": 18, "tamanho": 0.9, "ricochetes": 5, "piercing": 0,
-    "quantidade": 1, "cooldown": 1.0, "critico": 0.06,
-    "elementos": ["raio"], "comportamento": "basico",
-    "tags": ["elemental", "raio", "rapida"],
-    "cor": "#ffe14a", "inicial": true, "custo": 0
+    "dano": 7,
+    "velocidade": 18,
+    "tamanho": 0.9,
+    "ricochetes": 5,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 1.0,
+    "critico": 0.06,
+    "elementos": [
+      "raio"
+    ],
+    "comportamento": "basico",
+    "tags": [
+      "elemental",
+      "raio",
+      "rapida"
+    ],
+    "cor": "#ffe14a",
+    "inicial": true,
+    "custo": 0
   },
   {
     "id": "bumerangue",
     "nome": "Bumerangue",
     "descricao": "Ao atingir o topo da arena, volta direto para você atravessando tudo no caminho.",
     "raridade": "incomum",
-    "dano": 9, "velocidade": 17, "tamanho": 1.0, "ricochetes": 4, "piercing": 1,
-    "quantidade": 1, "cooldown": 0.9, "critico": 0.1,
-    "elementos": [], "comportamento": "bumerangue",
-    "tags": ["fisica", "critico", "piercing"],
-    "cor": "#d9a35a", "inicial": true, "custo": 0
+    "dano": 9,
+    "velocidade": 17,
+    "tamanho": 1.0,
+    "ricochetes": 4,
+    "piercing": 1,
+    "quantidade": 1,
+    "cooldown": 0.9,
+    "critico": 0.1,
+    "elementos": [],
+    "comportamento": "bumerangue",
+    "tags": [
+      "fisica",
+      "critico",
+      "piercing"
+    ],
+    "cor": "#d9a35a",
+    "inicial": true,
+    "custo": 0
   },
   {
     "id": "peste",
-    "nome": "Peste",
-    "descricao": "Veneno acumulativo. Quando o inimigo morre, o veneno se espalha.",
+    "nome": "Jararaca",
+    "descricao": "Aplica PEÇONHA acumulativa, que dura mais que a Ardência e se espalha quando o alvo morre.",
     "raridade": "incomum",
-    "dano": 6, "velocidade": 14, "tamanho": 1.0, "ricochetes": 6, "piercing": 0,
-    "quantidade": 1, "cooldown": 0.9, "critico": 0.04,
-    "elementos": ["veneno"], "comportamento": "basico",
-    "tags": ["elemental", "veneno", "dot"],
-    "cor": "#7bd94a", "inicial": false, "custo": 40
+    "dano": 6,
+    "velocidade": 14,
+    "tamanho": 1.0,
+    "ricochetes": 6,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 0.9,
+    "critico": 0.04,
+    "elementos": [
+      "veneno"
+    ],
+    "comportamento": "basico",
+    "tags": [
+      "elemental",
+      "veneno",
+      "dot"
+    ],
+    "cor": "#7bd94a",
+    "inicial": false,
+    "custo": 40
   },
   {
     "id": "fantasma",
-    "nome": "Bola Fantasma",
-    "descricao": "Atravessa inimigos. Só ricocheteia nas paredes.",
+    "nome": "Corpo-Seco",
+    "descricao": "Assombração: atravessa inimigos e só ricocheteia nas paredes.",
     "raridade": "rara",
-    "dano": 7, "velocidade": 13, "tamanho": 1.1, "ricochetes": 9, "piercing": 99,
-    "quantidade": 1, "cooldown": 1.2, "critico": 0.05,
-    "elementos": [], "comportamento": "fantasma",
-    "tags": ["piercing", "espectral"],
-    "cor": "#9ff5e6", "inicial": false, "custo": 60
+    "dano": 7,
+    "velocidade": 13,
+    "tamanho": 1.1,
+    "ricochetes": 9,
+    "piercing": 99,
+    "quantidade": 1,
+    "cooldown": 1.2,
+    "critico": 0.05,
+    "elementos": [],
+    "comportamento": "fantasma",
+    "tags": [
+      "piercing",
+      "espectral"
+    ],
+    "cor": "#9ff5e6",
+    "inicial": false,
+    "custo": 60
   },
   {
     "id": "clone",
-    "nome": "Bola Clone",
-    "descricao": "Ao destruir um inimigo, pode criar uma cópia temporária de si mesma.",
+    "nome": "Maniva",
+    "descricao": "Como rama de mandioca: ao abater, pode brotar uma cópia temporária.",
     "raridade": "rara",
-    "dano": 8, "velocidade": 16, "tamanho": 0.95, "ricochetes": 5, "piercing": 0,
-    "quantidade": 1, "cooldown": 1.0, "critico": 0.05,
-    "elementos": [], "comportamento": "clone",
-    "tags": ["multiplicacao"],
-    "cor": "#e98cff", "inicial": false, "custo": 60
+    "dano": 8,
+    "velocidade": 16,
+    "tamanho": 0.95,
+    "ricochetes": 5,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 1.0,
+    "critico": 0.05,
+    "elementos": [],
+    "comportamento": "clone",
+    "tags": [
+      "multiplicacao"
+    ],
+    "cor": "#e98cff",
+    "inicial": false,
+    "custo": 60
   },
   {
     "id": "parasita",
-    "nome": "Parasita",
+    "nome": "Bomba-Relógio Junina",
     "descricao": "Gruda no inimigo e explode depois de alguns segundos.",
     "raridade": "rara",
-    "dano": 12, "velocidade": 13, "tamanho": 1.0, "ricochetes": 1, "piercing": 0,
-    "quantidade": 1, "cooldown": 1.4, "critico": 0.05,
-    "elementos": [], "comportamento": "parasita",
-    "tags": ["area", "dot"],
-    "cor": "#c43d6b", "inicial": false, "custo": 70
+    "dano": 12,
+    "velocidade": 13,
+    "tamanho": 1.0,
+    "ricochetes": 1,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 1.4,
+    "critico": 0.05,
+    "elementos": [],
+    "comportamento": "parasita",
+    "tags": [
+      "area",
+      "dot"
+    ],
+    "cor": "#c43d6b",
+    "inicial": false,
+    "custo": 70
   },
   {
     "id": "gravidade",
-    "nome": "Gravidade",
-    "descricao": "Cria um campo que segura e machuca os inimigos próximos.",
+    "nome": "Cuca",
+    "descricao": "\"Nana neném\": cria uma zona que segura, adormece e machuca quem estiver dentro.",
     "raridade": "epica",
-    "dano": 6, "velocidade": 12, "tamanho": 1.2, "ricochetes": 3, "piercing": 0,
-    "quantidade": 1, "cooldown": 1.6, "critico": 0.03,
-    "elementos": [], "comportamento": "gravidade",
-    "tags": ["controle", "area"],
-    "cor": "#6a4cff", "inicial": false, "custo": 90
+    "dano": 6,
+    "velocidade": 12,
+    "tamanho": 1.2,
+    "ricochetes": 3,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 1.6,
+    "critico": 0.03,
+    "elementos": [],
+    "comportamento": "gravidade",
+    "tags": [
+      "controle",
+      "area"
+    ],
+    "cor": "#6a4cff",
+    "inicial": false,
+    "custo": 90
   },
   {
     "id": "espelho",
     "nome": "Espelho",
     "descricao": "Copia o efeito do último elemento que atingiu o alvo.",
     "raridade": "epica",
-    "dano": 8, "velocidade": 16, "tamanho": 1.0, "ricochetes": 6, "piercing": 0,
-    "quantidade": 1, "cooldown": 1.0, "critico": 0.08,
-    "elementos": [], "comportamento": "espelho",
-    "tags": ["elemental", "critico"],
-    "cor": "#e8f0ff", "inicial": false, "custo": 90
+    "dano": 8,
+    "velocidade": 16,
+    "tamanho": 1.0,
+    "ricochetes": 6,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 1.0,
+    "critico": 0.08,
+    "elementos": [],
+    "comportamento": "espelho",
+    "tags": [
+      "elemental",
+      "critico"
+    ],
+    "cor": "#e8f0ff",
+    "inicial": false,
+    "custo": 90
   },
   {
     "id": "termodinamica",
-    "nome": "Termodinâmica",
-    "descricao": "FUSÃO Brasa + Glacial. Queima, resfria e explode em inimigos congelados ou lentos.",
+    "nome": "Caipirinha",
+    "descricao": "RECEITA Pimenta + Geada. Gelo e cachaça: queima, resfria e explode em quem está lento ou congelado.",
     "raridade": "epica",
-    "dano": 14, "velocidade": 15, "tamanho": 1.15, "ricochetes": 6, "piercing": 0,
-    "quantidade": 2, "cooldown": 0.9, "critico": 0.06,
-    "elementos": ["fogo", "gelo"], "comportamento": "termodinamica",
-    "tags": ["elemental", "fogo", "gelo", "area", "fusao"],
-    "cor": "#ff4fa0", "componentes": ["brasa", "glacial"], "custo": 0
+    "dano": 14,
+    "velocidade": 15,
+    "tamanho": 1.15,
+    "ricochetes": 6,
+    "piercing": 0,
+    "quantidade": 2,
+    "cooldown": 0.9,
+    "critico": 0.06,
+    "elementos": [
+      "fogo",
+      "gelo"
+    ],
+    "comportamento": "termodinamica",
+    "tags": [
+      "elemental",
+      "fogo",
+      "gelo",
+      "area",
+      "fusao"
+    ],
+    "cor": "#ff4fa0",
+    "componentes": [
+      [
+        "brasa",
+        "glacial"
+      ]
+    ],
+    "custo": 0
   },
   {
     "id": "plasma",
-    "nome": "Plasma",
-    "descricao": "FUSÃO Brasa + Arco. Cada salto elétrico causa uma explosão incendiária.",
+    "nome": "Busca-Pé",
+    "descricao": "RECEITA Pimenta + Trovoada. Cada salto elétrico estoura como busca-pé de festa junina.",
     "raridade": "epica",
-    "dano": 12, "velocidade": 18, "tamanho": 1.05, "ricochetes": 6, "piercing": 0,
-    "quantidade": 2, "cooldown": 0.95, "critico": 0.06,
-    "elementos": ["fogo", "raio"], "comportamento": "plasma",
-    "tags": ["elemental", "fogo", "raio", "area", "fusao"],
-    "cor": "#ff5af0", "componentes": ["brasa", "arco"], "custo": 0
+    "dano": 12,
+    "velocidade": 18,
+    "tamanho": 1.05,
+    "ricochetes": 6,
+    "piercing": 0,
+    "quantidade": 2,
+    "cooldown": 0.95,
+    "critico": 0.06,
+    "elementos": [
+      "fogo",
+      "raio"
+    ],
+    "comportamento": "plasma",
+    "tags": [
+      "elemental",
+      "fogo",
+      "raio",
+      "area",
+      "fusao"
+    ],
+    "cor": "#ff5af0",
+    "componentes": [
+      [
+        "brasa",
+        "arco"
+      ]
+    ],
+    "custo": 0
   },
   {
     "id": "neurotoxica",
-    "nome": "Neurotóxica",
-    "descricao": "FUSÃO Peste + Arco. O veneno salta de inimigo para inimigo através das descargas.",
+    "nome": "Poraquê",
+    "descricao": "RECEITA Jararaca + Trovoada. O peixe-elétrico: a peçonha salta de inimigo para inimigo pelas descargas.",
     "raridade": "epica",
-    "dano": 10, "velocidade": 17, "tamanho": 1.0, "ricochetes": 7, "piercing": 0,
-    "quantidade": 2, "cooldown": 0.9, "critico": 0.05,
-    "elementos": ["veneno", "raio"], "comportamento": "neurotoxica",
-    "tags": ["elemental", "veneno", "raio", "dot", "fusao"],
-    "cor": "#b4ff3a", "componentes": ["peste", "arco"], "custo": 0
+    "dano": 10,
+    "velocidade": 17,
+    "tamanho": 1.0,
+    "ricochetes": 7,
+    "piercing": 0,
+    "quantidade": 2,
+    "cooldown": 0.9,
+    "critico": 0.05,
+    "elementos": [
+      "veneno",
+      "raio"
+    ],
+    "comportamento": "neurotoxica",
+    "tags": [
+      "elemental",
+      "veneno",
+      "raio",
+      "dot",
+      "fusao"
+    ],
+    "cor": "#b4ff3a",
+    "componentes": [
+      [
+        "peste",
+        "arco"
+      ]
+    ],
+    "custo": 0
   },
   {
     "id": "singularidade",
-    "nome": "Singularidade",
-    "descricao": "FUSÃO Glacial + Gravidade. Um campo que atrai e congela tudo ao redor.",
+    "nome": "Feriado Nacional",
+    "descricao": "RECEITA Cuca + Geada. Tudo para: a zona congela todos que estiverem dentro.",
     "raridade": "lendaria",
-    "dano": 10, "velocidade": 12, "tamanho": 1.3, "ricochetes": 4, "piercing": 0,
-    "quantidade": 1, "cooldown": 1.4, "critico": 0.04,
-    "elementos": ["gelo"], "comportamento": "singularidade",
-    "tags": ["elemental", "gelo", "controle", "area", "fusao"],
-    "cor": "#4f7dff", "componentes": ["glacial", "gravidade"], "custo": 0
+    "dano": 10,
+    "velocidade": 12,
+    "tamanho": 1.3,
+    "ricochetes": 4,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 1.4,
+    "critico": 0.04,
+    "elementos": [
+      "gelo"
+    ],
+    "comportamento": "singularidade",
+    "tags": [
+      "elemental",
+      "gelo",
+      "controle",
+      "area",
+      "fusao"
+    ],
+    "cor": "#4f7dff",
+    "componentes": [
+      [
+        "gravidade",
+        "glacial"
+      ]
+    ],
+    "custo": 0
+  },
+  {
+    "id": "onca",
+    "nome": "Onça-Pintada",
+    "descricao": "Aplica 2 de ARRANHÃO (máx. 8). Inimigos arranhados sofrem dano extra por acúmulo a cada golpe de QUALQUER bola.",
+    "raridade": "incomum",
+    "dano": 8,
+    "velocidade": 16,
+    "tamanho": 1.0,
+    "ricochetes": 6,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 0.9,
+    "critico": 0.06,
+    "elementos": [],
+    "comportamento": "onca",
+    "tags": [
+      "sangramento",
+      "fisica"
+    ],
+    "cor": "#e8b04a",
+    "inicial": true,
+    "custo": 0
+  },
+  {
+    "id": "pipoca",
+    "nome": "Pipoca",
+    "descricao": "Ao acertar, estoura em 2–4 Bolinhas de Gude (recarga de 3s).",
+    "raridade": "incomum",
+    "dano": 7,
+    "velocidade": 15,
+    "tamanho": 1.0,
+    "ricochetes": 5,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 1.0,
+    "critico": 0.04,
+    "elementos": [],
+    "comportamento": "pipoca",
+    "tags": [
+      "multiplicacao"
+    ],
+    "cor": "#fff3c4",
+    "inicial": true,
+    "custo": 0
+  },
+  {
+    "id": "zabumba",
+    "nome": "Zabumba",
+    "descricao": "Batida de forró: cada acerto causa dano em área 3x3.",
+    "raridade": "incomum",
+    "dano": 8,
+    "velocidade": 13,
+    "tamanho": 1.15,
+    "ricochetes": 4,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 1.1,
+    "critico": 0.03,
+    "elementos": [],
+    "comportamento": "zabumba",
+    "tags": [
+      "area",
+      "pesada"
+    ],
+    "cor": "#c2412d",
+    "inicial": true,
+    "custo": 0
+  },
+  {
+    "id": "saci",
+    "nome": "Saci",
+    "descricao": "Redemoinho: atravessa inimigos e os desacelera em 30% por 5s, mas causa 25% menos dano.",
+    "raridade": "rara",
+    "dano": 9,
+    "velocidade": 17,
+    "tamanho": 1.0,
+    "ricochetes": 8,
+    "piercing": 99,
+    "quantidade": 1,
+    "cooldown": 1.0,
+    "critico": 0.05,
+    "elementos": [],
+    "comportamento": "saci",
+    "tags": [
+      "piercing",
+      "controle",
+      "vento"
+    ],
+    "cor": "#e0322b",
+    "inicial": false,
+    "custo": 50
+  },
+  {
+    "id": "pororoca",
+    "nome": "Pororoca",
+    "descricao": "A onda do rio: cada acerto atinge a LINHA inteira.",
+    "raridade": "rara",
+    "dano": 7,
+    "velocidade": 14,
+    "tamanho": 1.0,
+    "ricochetes": 4,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 1.3,
+    "critico": 0.04,
+    "elementos": [],
+    "comportamento": "pororoca",
+    "tags": [
+      "area",
+      "agua"
+    ],
+    "cor": "#3f8fd8",
+    "inicial": false,
+    "custo": 60
+  },
+  {
+    "id": "cachoeira",
+    "nome": "Cachoeira",
+    "descricao": "Queda d'água: cada acerto atinge a COLUNA inteira.",
+    "raridade": "rara",
+    "dano": 7,
+    "velocidade": 14,
+    "tamanho": 1.0,
+    "ricochetes": 4,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 1.3,
+    "critico": 0.04,
+    "elementos": [],
+    "comportamento": "cachoeira",
+    "tags": [
+      "area",
+      "agua"
+    ],
+    "cor": "#7fd0ff",
+    "inicial": false,
+    "custo": 60
+  },
+  {
+    "id": "mau_olhado",
+    "nome": "Mau-Olhado",
+    "descricao": "Causa 3x de dano, mas se desfaz ao acertar. Risco e recompensa.",
+    "raridade": "rara",
+    "dano": 10,
+    "velocidade": 18,
+    "tamanho": 0.9,
+    "ricochetes": 1,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 1.6,
+    "critico": 0.1,
+    "elementos": [],
+    "comportamento": "mau_olhado",
+    "tags": [
+      "critico",
+      "risco"
+    ],
+    "cor": "#5a2d6b",
+    "inicial": false,
+    "custo": 50
+  },
+  {
+    "id": "paralelepipedo",
+    "nome": "Paralelepípedo",
+    "descricao": "Começa com 300% de dano e perde 40% a cada acerto (mín. 50%).",
+    "raridade": "incomum",
+    "dano": 10,
+    "velocidade": 14,
+    "tamanho": 1.15,
+    "ricochetes": 5,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 1.2,
+    "critico": 0.03,
+    "elementos": [],
+    "comportamento": "paralelepipedo",
+    "tags": [
+      "pesada",
+      "fisica"
+    ],
+    "cor": "#8f8f86",
+    "inicial": true,
+    "custo": 0
+  },
+  {
+    "id": "futebol",
+    "nome": "Bola de Futebol",
+    "descricao": "DRIBLE: 25% de chance de passar pelo inimigo e seguir para o próximo, +15% de dano a cada drible.",
+    "raridade": "incomum",
+    "dano": 9,
+    "velocidade": 17,
+    "tamanho": 1.0,
+    "ricochetes": 6,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 0.9,
+    "critico": 0.08,
+    "elementos": [],
+    "comportamento": "futebol",
+    "tags": [
+      "fisica",
+      "critico"
+    ],
+    "cor": "#f3f3ee",
+    "inicial": true,
+    "custo": 0
+  },
+  {
+    "id": "acai",
+    "nome": "Açaí",
+    "descricao": "A cada 10 acertos, recupera 3 de vida. Sustento lento e constante.",
+    "raridade": "comum",
+    "dano": 7,
+    "velocidade": 15,
+    "tamanho": 1.0,
+    "ricochetes": 6,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 0.95,
+    "critico": 0.04,
+    "elementos": [],
+    "comportamento": "acai",
+    "tags": [
+      "cura"
+    ],
+    "cor": "#5a1d6b",
+    "inicial": false,
+    "custo": 40
+  },
+  {
+    "id": "morcego",
+    "nome": "Morcego",
+    "descricao": "5% de chance de recuperar 2 de vida a cada acerto.",
+    "raridade": "comum",
+    "dano": 8,
+    "velocidade": 16,
+    "tamanho": 0.95,
+    "ricochetes": 6,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 0.9,
+    "critico": 0.05,
+    "elementos": [],
+    "comportamento": "morcego",
+    "tags": [
+      "cura"
+    ],
+    "cor": "#3a2a3f",
+    "inicial": false,
+    "custo": 40
+  },
+  {
+    "id": "bomba_sao_joao",
+    "nome": "Bomba de São João",
+    "descricao": "RECEITA Pimenta + Tatu-Bola. Explode ao acertar: grande dano em área e Ardência.",
+    "raridade": "epica",
+    "dano": 20,
+    "velocidade": 12,
+    "tamanho": 1.3,
+    "ricochetes": 3,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 1.4,
+    "critico": 0.05,
+    "elementos": [
+      "fogo"
+    ],
+    "comportamento": "bomba",
+    "tags": [
+      "area",
+      "fogo",
+      "pesada",
+      "receita"
+    ],
+    "cor": "#ff9f2e",
+    "custo": 0,
+    "componentes": [
+      [
+        "brasa",
+        "ferro"
+      ]
+    ]
+  },
+  {
+    "id": "cristo_redentor",
+    "nome": "Cristo Redentor",
+    "descricao": "RECEITA Pororoca + Cachoeira. De braços abertos: atinge a linha E a coluna inteiras.",
+    "raridade": "lendaria",
+    "dano": 14,
+    "velocidade": 14,
+    "tamanho": 1.1,
+    "ricochetes": 5,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 1.2,
+    "critico": 0.05,
+    "elementos": [],
+    "comportamento": "cristo",
+    "tags": [
+      "area",
+      "agua",
+      "receita"
+    ],
+    "cor": "#f3e3c3",
+    "custo": 0,
+    "componentes": [
+      [
+        "pororoca",
+        "cachoeira"
+      ]
+    ]
+  },
+  {
+    "id": "fumace",
+    "nome": "Fumacê",
+    "descricao": "RECEITA Jararaca + Saci (ou Mau-Olhado + Saci). O carro do fumacê passou: atravessa e aplica 3 de Peçonha num raio de 2.",
+    "raridade": "epica",
+    "dano": 8,
+    "velocidade": 15,
+    "tamanho": 1.1,
+    "ricochetes": 8,
+    "piercing": 99,
+    "quantidade": 2,
+    "cooldown": 1.0,
+    "critico": 0.04,
+    "elementos": [
+      "veneno"
+    ],
+    "comportamento": "fumace",
+    "tags": [
+      "veneno",
+      "area",
+      "piercing",
+      "receita"
+    ],
+    "cor": "#9fe07a",
+    "custo": 0,
+    "componentes": [
+      [
+        "peste",
+        "saci"
+      ],
+      [
+        "mau_olhado",
+        "saci"
+      ]
+    ]
+  },
+  {
+    "id": "minuano",
+    "nome": "Minuano",
+    "descricao": "RECEITA Geada + Saci (ou Geada + Trovoada). Vento gelado do Sul: congela tudo num raio de 2.",
+    "raridade": "epica",
+    "dano": 11,
+    "velocidade": 15,
+    "tamanho": 1.1,
+    "ricochetes": 6,
+    "piercing": 0,
+    "quantidade": 2,
+    "cooldown": 1.0,
+    "critico": 0.04,
+    "elementos": [
+      "gelo"
+    ],
+    "comportamento": "minuano",
+    "tags": [
+      "gelo",
+      "controle",
+      "area",
+      "receita"
+    ],
+    "cor": "#cfeeff",
+    "custo": 0,
+    "componentes": [
+      [
+        "glacial",
+        "saci"
+      ],
+      [
+        "glacial",
+        "arco"
+      ]
+    ]
+  },
+  {
+    "id": "peixeira",
+    "nome": "Peixeira",
+    "descricao": "RECEITA Onça-Pintada + Tatu-Bola. 3 de Arranhão; com 12+ acúmulos, consome tudo e tira 20% da vida atual.",
+    "raridade": "epica",
+    "dano": 16,
+    "velocidade": 13,
+    "tamanho": 1.15,
+    "ricochetes": 5,
+    "piercing": 0,
+    "quantidade": 1,
+    "cooldown": 1.1,
+    "critico": 0.08,
+    "elementos": [],
+    "comportamento": "peixeira",
+    "tags": [
+      "sangramento",
+      "pesada",
+      "receita"
+    ],
+    "cor": "#c9c2b3",
+    "custo": 0,
+    "componentes": [
+      [
+        "onca",
+        "ferro"
+      ]
+    ]
   }
 ]

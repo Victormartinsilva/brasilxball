@@ -3,6 +3,7 @@ extends Node3D
 ## O personagem na base da arena. Move só no eixo X (2D), mira com o mouse ou automaticamente.
 
 const Y := 0.35
+const Y_MAX := 3.2          # faixa de defesa: o personagem anda em X e Y
 const LIMIT := 5.55
 
 var char_data: Dictionary
@@ -10,6 +11,8 @@ var pos := Vector2(0, Y)
 var move_speed := 6.0
 var aim_dir := Vector2.UP
 var target_x := 0.0          # usado por toque/clique
+var target_y := Y
+var speed_mult := 1.0        # chutar deixa o personagem mais lento
 var use_target := false
 var hurt_flash := 0.0
 
@@ -47,16 +50,17 @@ func setup(character: Dictionary) -> void:
 	_sync()
 
 
-func move(axis: float, delta: float) -> void:
-	if use_target and absf(axis) < 0.01:
-		var diff := target_x - pos.x
-		axis = clampf(diff * 3.0, -1.0, 1.0) if absf(diff) > 0.05 else 0.0
+func move(axis: Vector2, delta: float) -> void:
+	var spd := move_speed * speed_mult
+	if use_target and axis.length() < 0.01:
 		# Seguir o dedo/cursor é um pouco mais ágil que o teclado, mas nunca teleporta.
-		var step := axis * move_speed * 1.5 * delta
-		pos.x = clampf(pos.x + (step if absf(step) < absf(diff) else diff), -LIMIT, LIMIT)
-		_sync()
-		return
-	pos.x = clampf(pos.x + axis * move_speed * delta, -LIMIT, LIMIT)
+		var diff := Vector2(target_x, target_y) - pos
+		var step := spd * 1.5 * delta
+		pos += diff if diff.length() <= step else diff.normalized() * step
+	else:
+		pos += axis.limit_length(1.0) * spd * delta
+	pos.x = clampf(pos.x, -LIMIT, LIMIT)
+	pos.y = clampf(pos.y, Y, Y_MAX)
 	_sync()
 
 

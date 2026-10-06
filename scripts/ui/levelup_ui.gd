@@ -6,7 +6,7 @@ signal chosen(offer: Dictionary, context: String)
 
 const TYPE_NAMES := {
 	"nova_bola": "NOVA BOLA", "up_bola": "MELHORIA", "passiva": "PASSIVA",
-	"fusao": "FUSÃO", "reliquia": "RELÍQUIA", "cura": "CURA",
+	"fusao": "RECEITA", "reliquia": "RELÍQUIA", "cura": "CURA",
 }
 
 var _root: Control
@@ -52,7 +52,7 @@ func _ready() -> void:
 	var foot := UIKit.hbox(10)
 	foot.alignment = BoxContainer.ALIGNMENT_CENTER
 	v.add_child(foot)
-	_reroll = UIKit.button("Rerrolar", _do_reroll, 18, 200)
+	_reroll = UIKit.button("Tirar na Sorte", _do_reroll, 18, 260)
 	foot.add_child(_reroll)
 
 
@@ -90,8 +90,15 @@ func _rebuild_cards() -> void:
 		else:
 			var card_w := clampf((vp.x - 120.0) / maxf(1.0, _offers.size()) - 16.0, 170.0, 260.0)
 			_cards.add_child(_make_card(_offers[i], i, card_w))
-	_reroll.visible = _context == "levelup" and _build.rerolls > 0
-	_reroll.text = "Rerrolar (%d)" % _build.rerolls
+	# "Tirar na Sorte": grátis com os Patuás do Arsenal; depois custa sucata, e fica mais caro a cada uso.
+	var run := get_parent() as Run
+	_reroll.visible = _context == "levelup"
+	if _build.rerolls > 0:
+		_reroll.text = "Tirar na Sorte (grátis x%d)" % _build.rerolls
+		_reroll.disabled = false
+	else:
+		_reroll.text = "Tirar na Sorte (%d sucata)" % run.reroll_cost()
+		_reroll.disabled = run.sucata_run < run.reroll_cost()
 
 
 func _card_shell(o: Dictionary, index: int, size: Vector2) -> PanelContainer:
@@ -203,9 +210,13 @@ func _pick(index: int) -> void:
 
 
 func _do_reroll() -> void:
-	if _build.rerolls <= 0:
-		return
-	_build.rerolls -= 1
 	var run := get_parent() as Run
+	if _build.rerolls > 0:
+		_build.rerolls -= 1
+	elif run.sucata_run >= run.reroll_cost():
+		run.sucata_run -= run.reroll_cost()
+		run.rerolls_paid += 1
+	else:
+		return
 	_offers = _build.generate_offers(run.rng)
 	_rebuild_cards()

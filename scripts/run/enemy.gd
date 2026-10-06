@@ -28,11 +28,16 @@ var poison_time := 0.0
 var poison_stacks := 0
 var poison_dps_per_stack := 1.0
 var marked := false
+var scratch_stacks := 0      # Arranhão (Onça-Pintada)
+var slow_time := 0.0         # lentidão sem congelar (Saci)
 var last_element := ""
 var recent: Dictionary = {}   # elemento -> tempo restante (para reações)
 var gravity_slow := 0.0
 
 var shoot_timer := 0.0
+var melee_timer := 0.0       # preparo do ataque corpo a corpo (olho gordo)
+var melee_cd := 0.0
+var _eye: Node3D
 var _label: Label3D
 var _model: Node3D
 var _status: MeshInstance3D
@@ -125,6 +130,22 @@ func sync_visual() -> void:
 		_label.text = str(shown)
 
 
+## Aviso de ataque corpo a corpo: o "olho gordo" 👁 sobre o inimigo.
+func show_eye(on: bool) -> void:
+	if on and _eye == null:
+		_eye = Node3D.new()
+		_eye.position = Vector3(0, 1.85, 0)
+		add_child(_eye)
+		var white := Models.sphere(_eye, 0.26, Color("#fff8e8"), Vector3.ZERO, 1.5)
+		white.scale = Vector3(1.4, 0.8, 0.5)
+		Models.sphere(_eye, 0.12, Color("#2e6fd8"), Vector3(0, 0, 0.1), 1.0, false)
+		Models.sphere(_eye, 0.06, Color("#120d08"), Vector3(0, 0, 0.16), 0.0, false)
+	if _eye:
+		_eye.visible = on
+		if on:
+			_eye.scale = Vector3.ONE * (1.0 + sin(Time.get_ticks_msec() / 60.0) * 0.12)
+
+
 func punch() -> void:
 	_punch = 1.0
 
@@ -169,6 +190,10 @@ func update_status_visual() -> void:
 		c = GameData.ELEMENT_COLORS["veneno"]
 	elif chill_time > 0.0:
 		c = GameData.ELEMENT_COLORS["gelo"]
+	elif scratch_stacks > 0:
+		c = Color("#d98a3a")
+	elif slow_time > 0.0:
+		c = Color("#e0322b")
 	if marked:
 		c = Color("#ffe14a")
 	_status.visible = c.a > 0.0
@@ -190,6 +215,8 @@ func move_factor() -> float:
 	var f := 1.0
 	if chill_time > 0.0:
 		f *= 0.55
+	if slow_time > 0.0:
+		f *= 0.7
 	if gravity_slow > 0.0:
 		f *= 1.0 - gravity_slow
 	return f

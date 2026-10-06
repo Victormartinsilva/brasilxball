@@ -4,6 +4,7 @@ extends CanvasLayer
 ## trilha de progresso com caveiras à direita, botões de velocidade no topo.
 
 const SPEEDS := [1.0, 1.5, 2.0]
+const RITMOS := ["Xote", "Forró", "Frevo"]  # velocidade do jogo = ritmo
 
 var run: Run
 var _root: Control
@@ -78,7 +79,7 @@ func setup(the_run: Run) -> void:
 	_top_right = UIKit.hbox(8)
 	_root.add_child(_top_right)
 	_speed_button = UIKit.button(">", cycle_speed, 22)
-	_speed_button.custom_minimum_size = Vector2(76, 64)
+	_speed_button.custom_minimum_size = Vector2(96, 64)
 	_speed_button.focus_mode = Control.FOCUS_NONE
 	_top_right.add_child(_speed_button)
 	var pb := UIKit.button("II", toggle_pause, 22)
@@ -148,7 +149,7 @@ func _layout() -> void:
 	var portrait := is_portrait()
 	UIKit.place(_top_left, Vector2(0, 0), Vector2(18, 12))
 	UIKit.place(_top_center, Vector2(0.5, 0), Vector2(-110, 8), Vector2(220, 0))
-	UIKit.place(_top_right, Vector2(1, 0), Vector2(-160, 12), Vector2(148, 64))
+	UIKit.place(_top_right, Vector2(1, 0), Vector2(-180, 12), Vector2(168, 64))
 	var w := minf(660.0, _root.size.x - 32.0)
 	if portrait:
 		UIKit.place(_ability_button, Vector2(1, 1), Vector2(-136, -196), Vector2(120, 120))
@@ -360,7 +361,7 @@ func _set_speed(i: int) -> void:
 	_speed_index = i
 	if not run.game_over:
 		Engine.time_scale = SPEEDS[i]
-	_speed_button.text = ">".repeat(i + 1)
+	_speed_button.text = RITMOS[i]
 
 
 func cycle_speed() -> void:
@@ -393,6 +394,13 @@ func _build_pause() -> void:
 	help.custom_minimum_size.x = minf(440.0, _root.size.x - 80.0)
 	v.add_child(help)
 	v.add_child(UIKit.button("Continuar", toggle_pause, 26, 320))
+	var som := UIKit.button("", func(): pass, 20, 320)
+	som.text = "Som: LIGADO" if Sfx.enabled() else "Som: DESLIGADO"
+	som.pressed.connect(func():
+		Sfx.toggle()
+		som.text = "Som: LIGADO" if Sfx.enabled() else "Som: DESLIGADO"
+	)
+	v.add_child(som)
 	v.add_child(UIKit.button("Abandonar run", _abandon, 20, 320))
 
 

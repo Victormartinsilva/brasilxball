@@ -4,14 +4,20 @@ extends Node
 const PATH := "user://ballxbrasil_save.json"
 const VERSION := 1
 
-## Melhorias do Arsenal: id -> {nome, max, custo_base, descricao}
+## Arsenal: os 6 ATRIBUTOS do GDD (Grota Funda) + extras. id -> {nome, grupo, max, custo, descricao}
+## Dica para o jogador: "Na dúvida, invista em Raça + Torcida."
 const UPGRADES := {
-	"vida": {"nome": "Couraça", "max": 5, "custo": 25, "descricao": "+12 de vida máxima por nível."},
-	"dano": {"nome": "Afiação", "max": 5, "custo": 30, "descricao": "+6% de dano por nível."},
-	"cadencia": {"nome": "Engrenagem", "max": 5, "custo": 30, "descricao": "+5% de cadência por nível."},
-	"ima": {"nome": "Imã de Sucata", "max": 3, "custo": 20, "descricao": "+25% de alcance de coleta por nível."},
-	"sorte": {"nome": "Patuá", "max": 3, "custo": 40, "descricao": "+1 rerrolagem de escolhas por run, por nível."},
+	"folego": {"nome": "Fôlego", "grupo": "atributo", "max": 5, "custo": 25, "descricao": "Vida: +12 de vida máxima por nível."},
+	"raca": {"nome": "Raça", "grupo": "atributo", "max": 5, "custo": 30, "descricao": "Dano base: +6% por nível."},
+	"torcida": {"nome": "Torcida", "grupo": "atributo", "max": 5, "custo": 30, "descricao": "Bolinhas de Gude: +10% de dano por nível e +1 bolinha inicial a cada 2 níveis."},
+	"ginga": {"nome": "Ginga", "grupo": "atributo", "max": 5, "custo": 30, "descricao": "Velocidade: +4% da bola e do movimento por nível."},
+	"malandragem": {"nome": "Malandragem", "grupo": "atributo", "max": 5, "custo": 30, "descricao": "Crítico e chute: +2% de crítico e +5% de cadência por nível."},
+	"sabedoria": {"nome": "Sabedoria", "grupo": "atributo", "max": 5, "custo": 35, "descricao": "Área e status: +8% de área de efeito e de dano de Ardência/Peçonha por nível."},
+	"ima": {"nome": "Imã de Sucata", "grupo": "extra", "max": 3, "custo": 20, "descricao": "+25% de alcance de coleta por nível."},
+	"sorte": {"nome": "Patuá", "grupo": "extra", "max": 3, "custo": 40, "descricao": "+1 \"Tirar na Sorte\" grátis por run, por nível."},
+	"banco": {"nome": "Casa da Rezadeira", "grupo": "extra", "max": 3, "custo": 45, "descricao": "+1 \"Mandar pro Banco\" por run: tira uma opção do sorteio de vez."},
 }
+const OLD_UPGRADE_KEYS := {"vida": "folego", "dano": "raca", "cadencia": "malandragem"}
 
 ## Fusões liberadas no Laboratório. As duas primeiras já vêm liberadas.
 const FUSION_COSTS := {
@@ -43,7 +49,7 @@ func default_data() -> Dictionary:
 	return {
 		"versao": VERSION,
 		"sucata": 0,
-		"upgrades": {"vida": 0, "dano": 0, "cadencia": 0, "ima": 0, "sorte": 0},
+		"upgrades": {},
 		"bolas": balls,
 		"fusoes": fusions,
 		"reliquias": relics,
@@ -75,6 +81,13 @@ func _migrate() -> void:
 		for id in fresh[key]:
 			if not data[key].has(id):
 				data[key].append(id)
+	# Melhorias antigas viram atributos (Couraça → Fôlego, Afiação → Raça, Engrenagem → Malandragem).
+	var ups: Dictionary = data["upgrades"]
+	for old in OLD_UPGRADE_KEYS:
+		if ups.has(old):
+			var new_key: String = OLD_UPGRADE_KEYS[old]
+			ups[new_key] = maxi(int(ups.get(new_key, 0)), int(ups[old]))
+			ups.erase(old)
 
 
 func _merge(base: Dictionary, incoming: Dictionary) -> void:

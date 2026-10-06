@@ -58,7 +58,7 @@ Legenda: ✅ implementado · 🟡 parcial · ⏳ pendente · ❓ decisão em abe
 | Receitas (bolas nível 3) na "Panela de Pressão", com receitas alternativas | ✅ 9 receitas |
 | **Tirar na Sorte** com custo crescente | ✅ grátis com Patuás do Arsenal, depois 5, 10, 15… de sucata |
 | Patuá com Benzer / Misturar / Encantar | ❓ conflita com o glossário do GDD-03 (Repique / Mistura / Receita) |
-| Mandar pro Banco (banir opção) | ⏳ |
+| Mandar pro Banco (banir opção) | ✅ cargas vêm da Casa da Rezadeira (Arsenal) |
 | Chefe do folclore | ❓ hoje o chefe é O Arranha-Céu (São Paulo) |
 
 ## 6. Fora da partida
@@ -67,7 +67,9 @@ Legenda: ✅ implementado · 🟡 parcial · ⏳ pendente · ❓ decisão em abe
 |---|---|
 | Morrer não é derrota total | ✅ mantém 60% da sucata |
 | A Vila / Mutirão (pinball) / Causos / Mandioca-Madeira-Barro | ❓ hoje é o Acampamento com Sucata |
-| 6 atributos (Fôlego, Raça, Torcida, Ginga, Malandragem, Sabedoria) | 🟡 Torcida existe; os demais ⏳ |
+| 6 atributos (Fôlego, Raça, Torcida, Ginga, Malandragem, Sabedoria) | ✅ comprados no Arsenal com sucata; saves antigos migrados |
+| Ritmo Xote → Forró → Frevo (velocidade do jogo) | ✅ |
+| Áudio: efeitos + forró/baião | ✅ provisório, gerado por `tools/gerar_audio.py` (botão Som no menu e na pausa) |
 
 ## Decisões em aberto (precisam de Victor e Isa)
 

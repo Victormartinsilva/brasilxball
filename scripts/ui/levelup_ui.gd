@@ -14,6 +14,8 @@ var _title: Label
 var _subtitle: Label
 var _cards: BoxContainer
 var _reroll: Button
+var _banish: Button
+var _banish_mode := false
 var _offers: Array = []
 var _context := ""
 var _build: RunBuild
@@ -54,6 +56,8 @@ func _ready() -> void:
 	v.add_child(foot)
 	_reroll = UIKit.button("Tirar na Sorte", _do_reroll, 18, 260)
 	foot.add_child(_reroll)
+	_banish = UIKit.button("Mandar pro Banco", _toggle_banish, 18, 240)
+	foot.add_child(_banish)
 
 
 func is_open() -> bool:
@@ -92,6 +96,9 @@ func _rebuild_cards() -> void:
 			_cards.add_child(_make_card(_offers[i], i, card_w))
 	# "Tirar na Sorte": grátis com os Patuás do Arsenal; depois custa sucata, e fica mais caro a cada uso.
 	var run := get_parent() as Run
+	_banish_mode = false
+	_banish.visible = _context == "levelup" and _build.banishes > 0
+	_banish.text = "Mandar pro Banco (%d)" % _build.banishes
 	_reroll.visible = _context == "levelup"
 	if _build.rerolls > 0:
 		_reroll.text = "Tirar na Sorte (grátis x%d)" % _build.rerolls
@@ -196,8 +203,33 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 
 
+func _toggle_banish() -> void:
+	_banish_mode = not _banish_mode
+	_subtitle.text = "Toque na opção que vai para o banco (some do sorteio nesta run)." if _banish_mode else "Escolha 1"
+	_banish.modulate = Color(1.4, 0.8, 0.8) if _banish_mode else Color.WHITE
+
+
+## Mandar pro Banco: tira a opção do sorteio de vez e troca só essa carta.
+func _banish_offer(index: int) -> void:
+	var o: Dictionary = _offers[index]
+	if not (o["tipo"] == "nova_bola" or (o["tipo"] == "passiva" and int(o["nivel"]) == 1)):
+		_subtitle.text = "Só dá para mandar pro banco bolas novas e passivas novas."
+		return
+	var run := get_parent() as Run
+	_build.banished.append(o["id"])
+	_build.banishes -= 1
+	var shown: Array = _offers.map(func(x): return x["id"])
+	var repl := _build.generate_offers(run.rng, 1, shown)
+	_offers[index] = repl[0]
+	_rebuild_cards()
+	_subtitle.text = "%s foi pro banco." % o["nome"]
+
+
 func _pick(index: int) -> void:
 	if not _open or index >= _offers.size():
+		return
+	if _banish_mode:
+		_banish_offer(index)
 		return
 	# Evita clique acidental no instante em que a tela abre.
 	if Time.get_ticks_msec() - _opened_at < 400 and not (get_parent() as Run).autoplay:

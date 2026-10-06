@@ -33,7 +33,7 @@ Legenda: ✅ feito no protótipo · 🟡 parcial · ⏳ pendente
 - ✅ Mecânica de trânsito (veículos bloqueiam bolas)
 - ✅ Evento Feira da Paulista (escolha de relíquias)
 - ✅ Chefe O Arranha-Céu (pontos fracos, 2 fases, estilhaços, invocações)
-- ⏳ Música e efeitos sonoros
+- ✅ Música e efeitos sonoros (provisórios, sintetizados — `tools/gerar_audio.py`)
 - ⏳ Cenário "quebrando" ao longo da run
 
 ## Fase 5 — Progressão
@@ -51,7 +51,7 @@ Legenda: ✅ feito no protótipo · 🟡 parcial · ⏳ pendente
 ## Fase 7 — Polimento
 
 - ⏳ Assets definitivos ([ASSETS.md](ASSETS.md))
-- ⏳ Áudio
+- 🟡 Áudio (provisório pronto; falta o definitivo)
 - ⏳ Partículas e pós-processamento
 - ⏳ Balanceamento com jogadores reais
 - ⏳ Ranking via API na Vercel

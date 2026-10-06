@@ -36,6 +36,13 @@ func _ready() -> void:
 	play.custom_minimum_size.y = 84
 	_col.add_child(play)
 	_col.add_child(UIKit.button("Como jogar", func(): _help.visible = true, 22))
+	var som := UIKit.button("", func(): pass, 22)
+	som.text = "Som: LIGADO" if Sfx.enabled() else "Som: DESLIGADO"
+	som.pressed.connect(func():
+		Sfx.toggle()
+		som.text = "Som: LIGADO" if Sfx.enabled() else "Som: DESLIGADO"
+	)
+	_col.add_child(som)
 	if OS.has_feature("web") and GameData.is_mobile():
 		_col.add_child(UIKit.button("Tela cheia", _fullscreen, 22))
 

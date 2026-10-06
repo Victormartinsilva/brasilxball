@@ -130,6 +130,8 @@ func _ready() -> void:
 	player = Player.new()
 	add_child(player)
 	player.setup(character)
+	player.move_speed *= 1.0 + Save.upgrade_level("ginga") * 0.04  # Ginga
+	babies = Save.upgrade_level("torcida") / 2  # Torcida: bolinhas iniciais
 
 	camera = Camera3D.new()
 	add_child(camera)
@@ -152,6 +154,7 @@ func _ready() -> void:
 	for i in 4:
 		_spawn_row(SPAWN_Y - i * 1.0, 0.0)
 	hud.banner(region["nome"].to_upper(), region.get("subtitulo", ""), 2.5)
+	Sfx.music()
 
 
 func _on_resize() -> void:
@@ -447,6 +450,7 @@ func _fire(delta: float) -> void:
 		var b := spawn_ball(_bag_stats(id), player.pos + Vector2(0, 0.5), player.aim_dir.rotated(rng.randf_range(-0.03, 0.03)))
 		if b:
 			b.bag_id = id
+			Sfx.play("chute")
 		else:
 			bag.push_front(id)
 	if _rajada_queue > 0:
@@ -469,7 +473,7 @@ func _bag_stats(id: String) -> Dictionary:
 		var s := build.ball_stats("pedra", 1)
 		s["nome"] = "Bolinha de Gude"
 		s["tamanho"] *= 0.72
-		s["dano"] *= 0.4 + 0.04 * float(character.get("torcida", 4))  # Torcida fortalece as bolinhas
+		s["dano"] *= (0.4 + 0.04 * float(character.get("torcida", 4))) * (1.0 + Save.upgrade_level("torcida") * 0.1)  # Torcida
 		s["cor"] = Color("#9fd8ff")
 		return s
 	var i := build.slot_index(id)
@@ -590,6 +594,7 @@ func _step_ball(b: Ball, delta: float, smult: float) -> void:
 		if b.bag_id != "" and b.dir.y < 0.0 and b.age > 0.35 and b.pos.y < player.pos.y + 1.3 \
 				and b.pos.distance_to(player.pos + Vector2(0, 0.4)) < CATCH_RADIUS:
 			catches += 1
+			Sfx.play("pegar", 0.05)
 			fx.sparks(b.pos, Color("#fff3c4"), 5, 3.0)
 			if catches % 6 == 1:
 				fx.text(player.pos + Vector2(0, 1.4), "MATOU NO PEITO!", Color("#5fe0a0"), 0.006)
@@ -627,6 +632,7 @@ func _ball_walls(b: Ball) -> void:
 
 func _on_bounce(b: Ball) -> void:
 	b.bounces += 1
+	Sfx.play("ricochete", 0.2)
 	if absf(b.dir.y) < 0.2:
 		b.dir.y = 0.2 * (1.0 if b.dir.y >= 0.0 else -1.0)
 	b.dir = b.dir.rotated(rng.randf_range(-0.035, 0.035)).normalized()
@@ -824,6 +830,7 @@ func ball_hit(b: Ball, e: Enemy, contact: Vector2) -> bool:
 	var crit := rng.randf() < b.crit
 	var elemental := elements.size() > 0
 	fx.sparks(contact, b.color, 3, 3.0)
+	Sfx.play("acerto", 0.12)
 	deal_damage(e, dmg, crit, b.color, b, elemental)
 	if not e.dead or e.is_boss:
 		apply_elements(e, elements, dmg, b.level, b)
@@ -967,7 +974,9 @@ func deal_damage(e: Enemy, amount: float, crit := false, color := Color(1.0, 0.9
 
 
 func aoe(center: Vector2, radius: float, dmg: float, color: Color, exclude: Enemy = null, elemental := true) -> void:
+	radius *= build.area_mult()  # Sabedoria
 	fx.explosion(center, radius, color)
+	Sfx.play("explosao")
 	for e: Enemy in enemies.duplicate():
 		if e.dead or e == exclude:
 			continue
@@ -986,7 +995,7 @@ func apply_elements(e: Enemy, elements: Array, base_dmg: float, lvl: int, b: Bal
 		match el:
 			"fogo":
 				e.burn_time = 3.0
-				e.burn_dps = maxf(e.burn_dps if e.burn_time > 0.0 else 0.0, base_dmg * 0.35)
+				e.burn_dps = maxf(e.burn_dps if e.burn_time > 0.0 else 0.0, base_dmg * 0.35 * build.status_mult())
 			"gelo":
 				e.chill_time = 2.5
 				e.chill_stacks += 1
@@ -997,7 +1006,7 @@ func apply_elements(e: Enemy, elements: Array, base_dmg: float, lvl: int, b: Bal
 			"veneno":
 				e.poison_stacks = mini(e.poison_stacks + 1, 5 + lvl * 2)
 				e.poison_time = 4.0
-				e.poison_dps_per_stack = maxf(e.poison_dps_per_stack, base_dmg * 0.12)
+				e.poison_dps_per_stack = maxf(e.poison_dps_per_stack, base_dmg * 0.12 * build.status_mult())
 			"raio":
 				var hops: int = [1, 2, 4, 6, 8][clampi(lvl - 1, 0, 4)]
 				if b and b.behavior in ["plasma", "neurotoxica"]:
@@ -1128,6 +1137,7 @@ func _kill(e: Enemy, source: Ball = null) -> void:
 		_boss_defeated()
 		return
 	kills += 1
+	Sfx.play("abate", 0.15)
 	combo += 1
 	combo_timer = 2.5
 	best_combo = maxi(best_combo, combo)
@@ -1217,6 +1227,8 @@ func _update_melee(e: Enemy, delta: float) -> void:
 		e.contact_time += delta
 	else:
 		e.contact_time = maxf(0.0, e.contact_time - delta * 1.5)
+	if touching and e.contact_time > 0.15 and e.contact_time - delta <= 0.15:
+		Sfx.play("aviso", 0.0)
 	e.show_eye(e.contact_time > 0.15, e.contact_time / CONTACT_FUSE)
 	if e.contact_time >= CONTACT_FUSE:
 		e.dead = true
@@ -1383,6 +1395,7 @@ func _spawn_car(lane_y: float) -> void:
 	var start := Vector2(-10.5 * dir, lane_y)
 	node.position = FxLayer.to3(start)
 	cars.append({"node": node, "pos": start, "half": half, "vel": Vector2(dir * (5.5 if kind == "onibus" else 8.0), 0)})
+	Sfx.play("buzina", 0.05)
 	hud.toast("BI-BI! Trânsito na Paulista!" if kind != "onibus" else "Ônibus passando — segura a bola!")
 
 
@@ -1416,6 +1429,7 @@ func _update_gems(delta: float) -> void:
 		node.rotation.y += delta * 3.0
 		if dist < 0.55:
 			add_xp(float(g["value"]))
+			Sfx.play("gema", 0.1)
 			if build.passive("colecionador") > 0:
 				build.colecionador_bonus = minf(0.4, build.colecionador_bonus + build.pval("colecionador") / 100.0)
 				build.colecionador_timer = 4.0
@@ -1446,6 +1460,7 @@ func add_xp(v: float) -> void:
 func _open_levelup() -> void:
 	pending_levelups -= 1
 	var offers := build.generate_offers(rng)
+	Sfx.play("nivel", 0.0)
 	levelup.open_choice("SUBIU DE NÍVEL!", "Nível %d — escolha 1" % level, offers, build, "levelup")
 
 
@@ -1459,6 +1474,7 @@ func _on_offer_chosen(offer: Dictionary, context: String) -> void:
 			max_hp = float(character["vida"]) + build.max_hp_bonus()
 			heal(max_hp - before)
 		if offer["tipo"] == "fusao":
+			Sfx.play("receita", 0.0)
 			hud.banner("RECEITA!", "Panela de Pressão: " + String(offer["nome"]), 2.2)
 			fx.explosion(player.pos + Vector2(0, 1.0), 2.0, offer["cor"])
 			if not descobertas.has(offer["id"]):
@@ -1485,6 +1501,7 @@ func _check_events() -> void:
 
 func _start_boss() -> void:
 	boss_spawned = true
+	Sfx.play("chefe", 0.0)
 	var info: Dictionary = region["chefe"]
 	boss = BossArranhaCeu.new()
 	enemies_root.add_child(boss)
@@ -1536,6 +1553,7 @@ func _update_shards(delta: float) -> void:
 
 
 func _boss_defeated() -> void:
+	Sfx.play("vitoria", 0.0)
 	hud.banner("VITÓRIA!", "O Arranha-Céu desabou. São Paulo respira.", 3.0)
 	for k in 6:
 		fx.explosion(boss.pos + Vector2(rng.randf_range(-4, 4), rng.randf_range(-1, 1)), 2.5, Color("#ff9f2e"))
@@ -1553,11 +1571,13 @@ func damage_player(amount: float, src := "outro") -> void:
 		return
 	damage_taken[src] = float(damage_taken.get(src, 0.0)) + amount
 	hp -= amount
+	Sfx.play("dano", 0.1)
 	player.hurt_flash = 1.0
 	hud.flash_damage()
 	shake(0.25)
 	if hp <= 0.0:
 		hp = 0.0
+		Sfx.play("derrota", 0.0)
 		hud.banner("DERROTA", "Perdi a run... mas a próxima vai ser melhor.", 3.0)
 		game_over = true
 		Engine.time_scale = 0.4

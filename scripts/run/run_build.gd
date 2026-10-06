@@ -16,11 +16,14 @@ var colecionador_bonus := 0.0
 var colecionador_timer := 0.0
 var cacada_bonus := 0.0        # passiva da Caçadora
 var rerolls := 0
+var banishes := 0            # "Mandar pro Banco" restantes
+var banished: Array = []     # ids tirados do sorteio nesta run
 
 
 func _init(char_data: Dictionary) -> void:
 	character = char_data
 	rerolls = Save.upgrade_level("sorte")
+	banishes = Save.upgrade_level("banco")
 	add_ball(char_data["bola_inicial"])
 
 
@@ -48,7 +51,7 @@ func slot_index(ball_id: String) -> int:
 func damage_mult() -> float:
 	var m := float(character["dano"])
 	m *= 1.0 + pval("forca") / 100.0
-	m *= 1.0 + Save.upgrade_level("dano") * 0.06
+	m *= 1.0 + Save.upgrade_level("raca") * 0.06
 	if has_relic("ampulheta"):
 		m *= 1.4
 	if has_relic("coracao_dragao"):
@@ -59,21 +62,31 @@ func damage_mult() -> float:
 func fire_rate_mult() -> float:
 	var m := float(character["cadencia"])
 	m *= 1.0 + pval("cadencia") / 100.0
-	m *= 1.0 + Save.upgrade_level("cadencia") * 0.05
+	m *= 1.0 + Save.upgrade_level("malandragem") * 0.05
 	if has_relic("cafezinho"):
 		m *= 1.25
 	return m
 
 
 func ball_speed_mult() -> float:
-	var m := 1.0 + pval("impulso") / 100.0 + colecionador_bonus
+	var m := 1.0 + pval("impulso") / 100.0 + colecionador_bonus + Save.upgrade_level("ginga") * 0.04
 	if has_relic("ampulheta"):
 		m *= 0.75
 	return m
 
 
 func crit_bonus() -> float:
-	return float(character["critico"]) + pval("precisao") / 100.0 + cacada_bonus
+	return float(character["critico"]) + pval("precisao") / 100.0 + cacada_bonus + Save.upgrade_level("malandragem") * 0.02
+
+
+## Sabedoria: área de efeito.
+func area_mult() -> float:
+	return 1.0 + Save.upgrade_level("sabedoria") * 0.08
+
+
+## Sabedoria: dano de status (Ardência, Peçonha).
+func status_mult() -> float:
+	return 1.0 + Save.upgrade_level("sabedoria") * 0.08
 
 
 func size_mult() -> float:
@@ -100,7 +113,7 @@ func option_count() -> int:
 
 
 func max_hp_bonus() -> float:
-	return pval("vitalidade") + Save.upgrade_level("vida") * 12.0
+	return pval("vitalidade") + Save.upgrade_level("folego") * 12.0
 
 
 ## Stats finais de uma bola num slot.
@@ -192,22 +205,22 @@ func apply_offer(offer: Dictionary) -> void:
 
 # ------------------------------------------------------------------ ofertas (escolha 1 de 3)
 
-func generate_offers(rng: RandomNumberGenerator, count := -1) -> Array:
+func generate_offers(rng: RandomNumberGenerator, count := -1, exclude: Array = []) -> Array:
 	if count < 0:
 		count = option_count()
 	var pool: Array = []  # [offer, weight]
 	# Fusões têm prioridade: são o "momento uau" da build.
 	for fid in GameData.fusion_ids:
-		if can_fuse(fid):
+		if can_fuse(fid) and not exclude.has(fid):
 			pool.append([_offer("fusao", fid), 6.0])
 	# Upgrades das bolas atuais.
 	for s in slots:
-		if int(s["level"]) < MAX_BALL_LEVEL:
+		if int(s["level"]) < MAX_BALL_LEVEL and not exclude.has(s["id"]):
 			pool.append([_offer("up_bola", s["id"], int(s["level"]) + 1), 3.0])
 	# Novas bolas (se há slot livre).
 	if slots.size() < MAX_SLOTS:
 		for bid in GameData.balls:
-			if GameData.is_fusion(bid) or slot_index(bid) >= 0 or not Save.has_ball(bid):
+			if GameData.is_fusion(bid) or slot_index(bid) >= 0 or not Save.has_ball(bid) or banished.has(bid) or exclude.has(bid):
 				continue
 			if has_relic("coracao_dragao") and GameData.balls[bid]["elementos"].has("gelo"):
 				continue
@@ -217,7 +230,9 @@ func generate_offers(rng: RandomNumberGenerator, count := -1) -> Array:
 		var lv := passive(pid)
 		if lv >= int(GameData.passives[pid]["max"]):
 			continue
-		if lv == 0 and passives.size() >= MAX_PASSIVES:
+		if lv == 0 and (passives.size() >= MAX_PASSIVES or banished.has(pid)):
+			continue
+		if exclude.has(pid):
 			continue
 		pool.append([_offer("passiva", pid, lv + 1), 1.6 if lv == 0 else 2.0])
 	var chosen: Array = []

@@ -72,6 +72,7 @@ func _drop_backdrop() -> void:
 
 func goto_menu() -> void:
 	_ensure_backdrop()
+	Sfx.music()
 	_clear()
 	var m := MenuScreen.new()
 	m.play_pressed.connect(func(): goto_base())

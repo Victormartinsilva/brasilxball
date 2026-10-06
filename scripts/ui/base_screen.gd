@@ -325,12 +325,16 @@ func _build_lab() -> void:
 
 func _build_arsenal() -> void:
 	var v := _scroll_tab("Arsenal")
-	v.add_child(UIKit.label("Melhorias permanentes para todos os personagens.", 16, UIKit.MUTED, 2))
+	v.add_child(UIKit.wrap_label("Melhorias permanentes para todos os personagens. Na dúvida, invista em Raça + Torcida.", 16, UIKit.MUTED))
+	var group := ""
 	for uid in Save.UPGRADES:
 		var u: Dictionary = Save.UPGRADES[uid]
+		if u["grupo"] != group:
+			group = u["grupo"]
+			v.add_child(UIKit.label("ATRIBUTOS" if group == "atributo" else "EXTRAS", 20, UIKit.GOLD, 4))
 		var lv := Save.upgrade_level(uid)
 		var mx := int(u["max"])
-		var row := _item_row(UIKit.GOLD, u["nome"], "Nível %d / %d" % [lv, mx], u["descricao"])
+		var row := _item_row(UIKit.GOLD if u["grupo"] == "atributo" else UIKit.TEAL, u["nome"], "Nível %d / %d" % [lv, mx], u["descricao"])
 		v.add_child(row)
 		if lv >= mx:
 			row.add_child(UIKit.label("Máximo", 15, UIKit.TEAL, 3))

@@ -86,6 +86,7 @@ static func button(text: String, cb: Callable, size := 20, min_w := 0.0) -> Butt
 	if min_w > 0.0:
 		b.custom_minimum_size.x = min_w
 	b.custom_minimum_size.y = maxf(b.custom_minimum_size.y, 56.0)  # alvo de toque confortável
+	b.pressed.connect(func(): Sfx.play("botao", 0.05))
 	b.pressed.connect(cb)
 	return b
 

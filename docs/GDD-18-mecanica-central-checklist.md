@@ -21,10 +21,11 @@ Legenda: ✅ implementado · 🟡 parcial · ⏳ pendente · ❓ decisão em abe
 | Chute no ângulo da mira, automático enquanto há bola na bolsa | ✅ | `_fire` — 1 chute a cada 0,22s ÷ cadência |
 | Viagem em linha reta, ricochete em inimigos e paredes | ✅ | física própria com *substeps* |
 | Uma bola acerta dezenas de vezes | ✅ | a bola **não** volta mais ao esgotar ricochetes |
-| Só volta à bolsa ao descer até a linha de baixo | ✅ | `_ball_returned` |
+| A bola nunca se perde: ao tocar o fundo, rola pelo chão de volta até o jogador | ✅ | `_ball_hit_ground` |
 | **Matar no peito**: pegar no ar = recarga imediata | ✅ | raio de 0,9 ao redor do personagem, só bolas descendo |
 | Número de bolas limitado (tensão de ficar desarmado) | ✅ | HUD mostra "Bolsa X / Y" (fica vermelho em 0) |
-| Dentes-de-leite (bolinhas da Torcida) | ✅ "Bolinhas de Gude": Guardião 3, Alquimista 4, Caçadora 6 | `characters.json` → `torcida` |
+| Começa com UMA bola; o arsenal só cresce (+1 Bolinha de Gude por nível) | ✅ | `add_xp` → `babies` |
+| Torcida fortalece as Bolinhas de Gude | ✅ Guardião 3, Alquimista 4, Caçadora 6 | `characters.json` → `torcida` |
 
 ## 3. Habilidade do jogador
 
@@ -34,7 +35,9 @@ Legenda: ✅ implementado · 🟡 parcial · ⏳ pendente · ❓ decisão em abe
 | Chutar deixa o personagem mais lento | ✅ 60% da velocidade (Caçadora ignora — equivalente ao "Capoeirista") |
 | Desligar o chute para correr | ✅ botão "Chute: AUTO/PARADO" e tecla Q |
 | Projéteis inimigos destrutíveis pelas bolas | ✅ |
-| Corpo a corpo com aviso de olho gordo 👁 | ✅ olho sobre o inimigo, golpe após 0,9s se você continuar perto |
+| Tropas avançam pela grade, uma casa por vez (pulinho) | ✅ | `_advance_step` |
+| Ao chegar no fim do mapa, a peça pula no jogador e explode | ✅ dano garantido | `_update_leapers` |
+| Encostar numa peça por ~3,5s faz ela se auto-explodir (olho gordo 👁 enche) | ✅ | `_update_melee` |
 | Invasão: inimigo atravessa a linha e entra na vila | ✅ |
 
 ## 4. Tipos de bola × física

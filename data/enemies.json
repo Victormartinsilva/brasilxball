@@ -3,40 +3,83 @@
     "id": "pombo",
     "nome": "Pombo Mecânico",
     "descricao": "Praga clássica da Paulista, agora com engrenagens. Fraco, mas vem em bando.",
-    "hp": 14, "largura": 1, "xp": 1, "dano": 4,
-    "comportamento": "basico", "modelo": "pombo", "cor": "#8a93a6",
-    "tags": ["voador"]
+    "hp": 14,
+    "largura": 1,
+    "xp": 1,
+    "dano": 4,
+    "comportamento": "basico",
+    "modelo": "pombo",
+    "cor": "#8a93a6",
+    "tags": [
+      "voador"
+    ],
+    "arte": "res://assets/inimigos/pombo/frente.png"
   },
   {
     "id": "drone",
     "nome": "Drone de Entrega",
     "descricao": "Atira pacotes explosivos no jogador de tempos em tempos.",
-    "hp": 22, "largura": 1, "xp": 1, "dano": 6,
-    "comportamento": "atirador", "modelo": "drone", "cor": "#2f3640",
-    "tags": ["voador", "tecnologia"]
+    "hp": 22,
+    "largura": 1,
+    "xp": 1,
+    "dano": 6,
+    "comportamento": "atirador",
+    "modelo": "drone",
+    "cor": "#2f3640",
+    "tags": [
+      "voador",
+      "tecnologia"
+    ],
+    "arte": "res://assets/inimigos/drone/frente.png"
   },
   {
     "id": "robo",
     "nome": "Robô Zona Azul",
     "descricao": "Fiscal de estacionamento corrompido. O primeiro golpe é absorvido pela blindagem.",
-    "hp": 40, "largura": 1, "xp": 2, "dano": 8,
-    "comportamento": "blindado", "modelo": "robo", "cor": "#2e6fd8",
-    "tags": ["tecnologia", "blindado"]
+    "hp": 40,
+    "largura": 1,
+    "xp": 2,
+    "dano": 8,
+    "comportamento": "blindado",
+    "modelo": "robo",
+    "cor": "#2e6fd8",
+    "tags": [
+      "tecnologia",
+      "blindado"
+    ],
+    "arte": "res://assets/inimigos/robo/frente.png"
   },
   {
     "id": "fusca",
     "nome": "Fusca Corrompido",
     "descricao": "Ocupa duas faixas. Explode ao ser destruído, ferindo os vizinhos.",
-    "hp": 85, "largura": 2, "xp": 4, "dano": 14,
-    "comportamento": "explosivo", "modelo": "fusca", "cor": "#7a3cc9",
-    "tags": ["veiculo"]
+    "hp": 85,
+    "largura": 2,
+    "xp": 4,
+    "dano": 14,
+    "comportamento": "explosivo",
+    "modelo": "fusca",
+    "cor": "#7a3cc9",
+    "tags": [
+      "veiculo"
+    ],
+    "arte": "res://assets/inimigos/fusca/frente.png"
   },
   {
     "id": "concreto",
     "nome": "Golem de Concreto",
     "descricao": "Resiste a bolas leves. Bolas PESADAS causam dano extra.",
-    "hp": 130, "largura": 1, "xp": 5, "dano": 18,
-    "comportamento": "concreto", "modelo": "concreto", "cor": "#8f8f86",
-    "tags": ["concreto", "pesado"]
+    "hp": 130,
+    "largura": 1,
+    "xp": 5,
+    "dano": 18,
+    "comportamento": "concreto",
+    "modelo": "concreto",
+    "cor": "#8f8f86",
+    "tags": [
+      "concreto",
+      "pesado"
+    ],
+    "arte": "res://assets/inimigos/concreto/frente.png"
   }
 ]

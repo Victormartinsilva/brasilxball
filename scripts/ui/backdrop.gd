@@ -10,9 +10,8 @@ func _ready() -> void:
 	add_child(DioramaSaoPaulo.new())
 	var ids := ["guardiao", "cacadora", "alquimista"]
 	for i in ids.size():
-		var m := Models.build_character(ids[i])
+		var m := Models.character_visual(GameData.characters[ids[i]])
 		m.position = Vector3(-1.6 + i * 1.6, 0, 0.4)
-		m.rotation_degrees.y = 180.0
 		add_child(m)
 	# Alguns inimigos parados ao fundo, como uma "foto" da batalha.
 	var rng := RandomNumberGenerator.new()
@@ -21,7 +20,7 @@ func _ready() -> void:
 	for i in 14:
 		var id: String = models[rng.randi() % models.size()]
 		var data: Dictionary = GameData.enemies.get(id, GameData.enemies["pombo"])
-		var e := Models.build_enemy(data["modelo"], Color(data["cor"]), 1)
+		var e := Models.enemy_visual(data, Color(data["cor"]), int(data.get("largura", 1)))
 		e.position = Vector3(rng.randi_range(-5, 5), 0, -rng.randi_range(12, 22))
 		add_child(e)
 	_cam = Camera3D.new()

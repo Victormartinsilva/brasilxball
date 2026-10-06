@@ -73,6 +73,7 @@ var multiplicacao_count := 0
 var reactions_count := 0
 var descobertas: Array = []
 var damage_log: Dictionary = {}   # métricas de balanceamento
+var damage_taken: Dictionary = {}
 var boss_time := 0.0
 var _tiers_paid: Array = []
 var auto_aim := true
@@ -91,6 +92,7 @@ var _rajada_queue := 0
 var _rajada_timer := 0.0
 var _gem_mesh: Mesh
 var _acai_hits := 0
+var leapers: Array = []      # tropas que chegaram ao fim e estão pulando no jogador
 
 # Bolsa: as bolas são LIMITADAS. Só voltam quando descem até a linha de baixo ou são pegas no peito.
 var bag: Array = []
@@ -98,6 +100,7 @@ var auto_kick := true
 var kick_timer := 0.0
 var catches := 0
 var rerolls_paid := 0
+var babies := 0              # Bolinhas de Gude ganhas (1 por nível): o arsenal só cresce
 
 
 func setup(char_id: String, region_id: String) -> void:
@@ -182,6 +185,7 @@ func _process(delta: float) -> void:
 	_fire(delta)
 	_update_balls(delta)
 	_update_enemies(delta)
+	_update_leapers(delta)
 	_update_projectiles(delta)
 	_update_shards(delta)
 	_update_gems(delta)
@@ -358,14 +362,42 @@ func _pick_weighted(pool: Dictionary, max_width := 99) -> String:
 
 
 func _update_spawning(delta: float) -> void:
-	if boss_spawned:
-		return
 	_row_progress += _descend_speed() * delta
 	if _row_progress >= 1.0:
 		_row_progress -= 1.0
-		_spawn_row(SPAWN_Y, difficulty())
-	if time >= float(region["tempo_chefe"]):
+		_advance_step()  # as tropas continuam andando durante o chefe
+		if not boss_spawned:
+			_spawn_row(SPAWN_Y, difficulty())
+	if not boss_spawned and time >= float(region["tempo_chefe"]):
 		_start_boss()
+
+
+## As tropas andam pela GRADE: todas pulam uma casa para frente ao mesmo tempo.
+## Quem estiver bloqueado (inimigo parado na casa da frente) espera; lentos andam um passo sim, outro não.
+func _advance_step() -> void:
+	var order: Array = enemies.filter(func(x): return not x.dead and not x.is_boss)
+	order.sort_custom(func(a, b): return a.pos.y < b.pos.y)
+	for e: Enemy in order:
+		if e.frozen_time > 0.0 or e.gravity_slow > 0.5:
+			continue
+		if e.chill_time > 0.0 or e.slow_time > 0.0:
+			e.skip_step = not e.skip_step
+			if e.skip_step:
+				continue
+		var target := e.hop_to - 1.0 if e.hop_t < 1.0 else e.pos.y - 1.0
+		var blocked := false
+		for o: Enemy in order:
+			if o == e or o.dead:
+				continue
+			var oy := o.hop_to if o.hop_t < 1.0 else o.pos.y
+			if absf(o.pos.x - e.pos.x) < o.half.x + e.half.x - 0.05 and absf(oy - target) < 0.5:
+				blocked = true
+				break
+		if blocked:
+			continue
+		e.hop_from = e.pos.y
+		e.hop_to = target
+		e.hop_t = 0.0
 
 
 func _spawn_row(y: float, d: float, pool_override: Dictionary = {}) -> void:
@@ -437,7 +469,7 @@ func _bag_stats(id: String) -> Dictionary:
 		var s := build.ball_stats("pedra", 1)
 		s["nome"] = "Bolinha de Gude"
 		s["tamanho"] *= 0.72
-		s["dano"] *= 0.55
+		s["dano"] *= 0.4 + 0.04 * float(character.get("torcida", 4))  # Torcida fortalece as bolinhas
 		s["cor"] = Color("#9fd8ff")
 		return s
 	var i := build.slot_index(id)
@@ -446,7 +478,7 @@ func _bag_stats(id: String) -> Dictionary:
 
 ## Reconcilia a bolsa com a build: novas bolas entram, bolas fundidas saem.
 func _sync_bag() -> void:
-	var desired := {BABY_ID: int(character.get("torcida", 4))}
+	var desired := {BABY_ID: babies}
 	for s in build.slots:
 		desired[s["id"]] = int(build.ball_stats(s["id"], s["level"])["quantidade"])
 	var owned := {}
@@ -518,6 +550,15 @@ func _update_balls(delta: float) -> void:
 func _step_ball(b: Ball, delta: float, smult: float) -> void:
 	b.age += delta
 	b.spawn_cd -= delta
+	if b.rolling:
+		var home := player.pos + Vector2(0, -0.1)
+		var to_home := home - b.pos
+		var step := 12.0 * delta
+		if to_home.length() <= maxf(step, 0.45):
+			_ball_returned(b)
+		else:
+			b.pos += to_home.normalized() * step
+		return
 	if b.attached != null:
 		_update_parasite(b, delta)
 		return
@@ -581,7 +622,7 @@ func _ball_walls(b: Ball) -> void:
 			b.hit_ids.clear()
 			_start_return(b, false)
 	if b.pos.y < -0.4:
-		_ball_returned(b)
+		_ball_hit_ground(b)
 
 
 func _on_bounce(b: Ball) -> void:
@@ -613,6 +654,18 @@ func _ball_returned(b: Ball) -> void:
 	b.dead = true
 	if b.bag_id != "":
 		bag.append(b.bag_id)
+
+
+## A bola tocou o fundo: as da bolsa nunca se perdem — rolam pelo chão de volta até o jogador.
+func _ball_hit_ground(b: Ball) -> void:
+	if b.rolling:
+		return
+	if b.bag_id == "":
+		b.dead = true  # temporárias (clones, rajada, pipoca) somem
+	else:
+		b.rolling = true
+		b.returning = true
+		b.pos.y = -0.35
 	if character["id"] == "guardiao" and ability_time > 0.0:
 		var dmg := 22.0 * build.damage_mult() * (1.0 + level * 0.06)
 		fx.column(b.pos.x, 0.5, TOP, Color("#e8b04a"))
@@ -1120,7 +1173,6 @@ func _kill(e: Enemy, source: Ball = null) -> void:
 
 
 func _update_enemies(delta: float) -> void:
-	var speed := _descend_speed()
 	for e: Enemy in enemies:
 		if e.dead:
 			continue
@@ -1132,48 +1184,65 @@ func _update_enemies(delta: float) -> void:
 			boss.boss_update(delta)
 			boss.animate(delta)
 			continue
-		var new_y := e.pos.y - speed * e.move_factor() * delta
-		for o: Enemy in enemies:
-			if o == e or o.dead or o.is_boss or o.pos.y >= e.pos.y:
-				continue
-			if absf(o.pos.x - e.pos.x) < o.half.x + e.half.x - 0.05:
-				var limit := o.pos.y + o.half.y + e.half.y + 0.12
-				if new_y < limit:
-					new_y = minf(e.pos.y, limit)
-		e.pos.y = new_y
 		if e.behavior == "atirador" and e.frozen_time <= 0.0 and e.pos.y < 15.0:
 			e.shoot_timer -= delta
 			if e.shoot_timer <= 0.0:
 				e.shoot_timer = rng.randf_range(4.5, 7.5)
 				_enemy_shoot(e)
 		_update_melee(e, delta)
-		if e.pos.y - e.half.y <= ENEMY_LINE:
-			# Invasão: o inimigo atravessou a linha e entrou na vila.
-			hud.toast("Invadiram a vila!")
-			damage_player(e.contact_damage)
-			fx.explosion(e.pos, 1.0, Color("#ff3d1f"))
+		if e.dead:
+			continue
+		if e.hop_t >= 1.0 and e.pos.y - e.half.y <= ENEMY_LINE:
+			# Chegou ao fim do mapa: pula no jogador e explode.
 			e.dead = true
+			e.leaping = true
+			e.leap_from = e.pos
+			e.leap_t = 0.0
+			e.show_eye(false)
+			leapers.append(e)
 			continue
 		e.sync_visual()
 		e.animate(delta)
 		e.update_status_visual()
 
 
-## Ataque corpo a corpo: perto do personagem, o inimigo mostra o olho gordo 👁 e golpeia após 0,9s.
+const CONTACT_FUSE := 3.5   # segundos encostado numa peça até ela se auto-explodir em você
+
+## Contato: se o jogador fica encostado numa peça, ela mostra o olho gordo 👁 enchendo
+## e, depois de ~3,5s, se auto-explode sobre ele. Sair de perto esvazia o pavio.
 func _update_melee(e: Enemy, delta: float) -> void:
-	e.melee_cd = maxf(0.0, e.melee_cd - delta)
-	var near := absf(e.pos.x - player.pos.x) < e.half.x + 0.75 and (e.pos.y - e.half.y) - player.pos.y < 1.4
-	if e.melee_timer > 0.0:
-		e.melee_timer -= delta
-		e.show_eye(true)
-		if e.melee_timer <= 0.0:
-			e.show_eye(false)
-			e.melee_cd = 2.5
-			if near:
-				fx.ring(player.pos, 1.0, Color("#ff3d1f"))
-				damage_player(e.contact_damage * 0.6)
-	elif near and e.melee_cd <= 0.0 and e.frozen_time <= 0.0:
-		e.melee_timer = 0.9
+	var d := player.pos - e.pos
+	var touching := absf(d.x) < e.half.x + 0.55 and absf(d.y) < e.half.y + 0.6
+	if touching and e.frozen_time <= 0.0:
+		e.contact_time += delta
+	else:
+		e.contact_time = maxf(0.0, e.contact_time - delta * 1.5)
+	e.show_eye(e.contact_time > 0.15, e.contact_time / CONTACT_FUSE)
+	if e.contact_time >= CONTACT_FUSE:
+		e.dead = true
+		e.show_eye(false)
+		fx.explosion(e.pos, 1.3, Color("#ff3d1f"))
+		hud.toast("A peça explodiu em você!")
+		damage_player(e.contact_damage, "contato")
+
+
+## Pulo final: arco até a posição atual do jogador e explosão (dano garantido).
+func _update_leapers(delta: float) -> void:
+	var i := leapers.size() - 1
+	while i >= 0:
+		var e: Enemy = leapers[i]
+		e.leap_t += delta / 0.5
+		var t := minf(e.leap_t, 1.0)
+		var p := e.leap_from.lerp(player.pos, t)
+		e.position = Vector3(p.x, sin(t * PI) * 2.0, -p.y)
+		e.rotation.x = t * TAU * 0.5
+		if e.leap_t >= 1.0:
+			fx.explosion(player.pos, 1.2, Color("#ff3d1f"))
+			hud.toast("Invadiram a vila!")
+			damage_player(e.contact_damage, "invasao")
+			e.queue_free()
+			leapers.remove_at(i)
+		i -= 1
 
 
 func _tick_status(e: Enemy, delta: float) -> void:
@@ -1224,7 +1293,7 @@ func _update_projectiles(delta: float) -> void:
 		node.rotation.y += delta * 5.0
 		var hit_player: bool = p["pos"].distance_to(player.pos) < 0.6
 		if hit_player:
-			damage_player(p["dmg"])
+			damage_player(p["dmg"], "projetil")
 			fx.explosion(p["pos"], 0.7, Color("#ff9f2e"))
 		# Bolas destroem pacotes no caminho.
 		var shot := false
@@ -1370,6 +1439,8 @@ func add_xp(v: float) -> void:
 		level += 1
 		xp_next = _xp_needed(level)
 		pending_levelups += 1
+		babies += 1  # a cada nível chega mais uma Bolinha de Gude
+		_sync_bag()
 
 
 func _open_levelup() -> void:
@@ -1435,7 +1506,9 @@ func on_boss_phase(p: int) -> void:
 
 
 func boss_summon(y: float) -> void:
-	_spawn_row(clampf(y, 5.0, 14.0), 0.6, {"drone": 2, "pombo": 3})
+	# Alinha à grade de casas.
+	var row := SPAWN_Y - roundf(SPAWN_Y - clampf(y, 5.0, 14.0))
+	_spawn_row(row, 0.6, {"drone": 2, "pombo": 3})
 
 
 func boss_glass_rain(count: int) -> void:
@@ -1456,7 +1529,7 @@ func _update_shards(delta: float) -> void:
 		if s["timer"] <= 0.0:
 			fx.explosion(s["pos"], 0.9, Color("#cfe6ff"))
 			if absf(player.pos.x - s["pos"].x) < 0.85:
-				damage_player(12.0)
+				damage_player(12.0, "vidraca")
 			w.queue_free()
 			shards.remove_at(i)
 		i -= 1
@@ -1475,9 +1548,10 @@ func _boss_defeated() -> void:
 
 # =================================================================== JOGADOR
 
-func damage_player(amount: float) -> void:
+func damage_player(amount: float, src := "outro") -> void:
 	if game_over:
 		return
+	damage_taken[src] = float(damage_taken.get(src, 0.0)) + amount
 	hp -= amount
 	player.hurt_flash = 1.0
 	hud.flash_damage()
@@ -1589,7 +1663,8 @@ func _cleanup() -> void:
 	while i >= 0:
 		var e: Enemy = enemies[i]
 		if e.dead and not e.is_boss:
-			e.queue_free()
+			if not e.leaping:
+				e.queue_free()
 			enemies.remove_at(i)
 		i -= 1
 
@@ -1620,6 +1695,7 @@ func _finish(victory: bool) -> void:
 		"reliquias": build.relics.duplicate(),
 		"descobertas": descobertas,
 		"dano": damage_log,
+		"dano_recebido": damage_taken,
 		"tempo_chefe": boss_time,
 	}
 	finished.emit(result)

@@ -121,7 +121,7 @@ func _build_expedition() -> void:
 func _character_chip(c: Dictionary) -> Control:
 	var card := PanelContainer.new()
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.custom_minimum_size.y = 120
+	card.custom_minimum_size.y = 150
 	card.mouse_filter = Control.MOUSE_FILTER_STOP
 	card.gui_input.connect(func(ev: InputEvent):
 		if ev is InputEventMouseButton and not ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
@@ -132,7 +132,7 @@ func _character_chip(c: Dictionary) -> Control:
 	card.add_child(v)
 	var ic := CenterContainer.new()
 	ic.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ic.add_child(UIKit.icon(Color(c["cor"]), String(c["nome"]).substr(0, 1), 50.0))
+	ic.add_child(UIKit.portrait(c, 96.0))
 	v.add_child(ic)
 	var n := UIKit.label(c["nome"], 18, UIKit.CREAM, 5)
 	n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -144,6 +144,9 @@ func _fill_detail(c: Dictionary) -> void:
 	for ch in _char_detail.get_children():
 		ch.queue_free()
 	var ball: Dictionary = GameData.balls[c["bola_inicial"]]
+	var big := CenterContainer.new()
+	big.add_child(UIKit.portrait(c, 220.0))
+	_char_detail.add_child(big)
 	_char_detail.add_child(UIKit.wrap_label("%s — %s" % [c["nome"], c["arquetipo"]], 21, Color(c["cor"]).lightened(0.3)))
 	_char_detail.add_child(UIKit.wrap_label("Vida %d  •  Velocidade %.1f  •  Bola inicial: %s" % [int(c["vida"]), float(c["velocidade"]), ball["nome"]], 17))
 	_char_detail.add_child(UIKit.label("Passiva — " + String(c["passiva"]["nome"]), 19, UIKit.GOLD, 3))

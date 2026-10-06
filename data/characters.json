@@ -24,14 +24,21 @@
     },
     "cor": "#7d8a96",
     "cor2": "#8a5a3a",
-    "torcida": 3
+    "torcida": 3,
+    "arte": {
+      "jogo": "res://assets/personagens/guardiao/costas.png",
+      "retrato": "res://assets/personagens/guardiao/frente.png",
+      "skins": {
+        "dourado": "res://assets/personagens/guardiao/dourado.png"
+      }
+    }
   },
   {
     "id": "cacadora",
     "nome": "Caçadora",
     "arquetipo": "Velocidade + crítico + combo",
     "estilo": "Muitas bolas. Alta velocidade. Alto risco.",
-    "vida": 85,
+    "vida": 110,
     "velocidade": 8.5,
     "dano": 0.95,
     "cadencia": 1.2,
@@ -51,7 +58,11 @@
     },
     "cor": "#2f7a4a",
     "cor2": "#c2412d",
-    "torcida": 6
+    "torcida": 6,
+    "arte": {
+      "jogo": "res://assets/personagens/cacadora/frente.png",
+      "retrato": "res://assets/personagens/cacadora/frente.png"
+    }
   },
   {
     "id": "alquimista",
@@ -78,6 +89,10 @@
     },
     "cor": "#3fb8a5",
     "cor2": "#e8b04a",
-    "torcida": 4
+    "torcida": 4,
+    "arte": {
+      "jogo": "res://assets/personagens/alquimista/frente.png",
+      "retrato": "res://assets/personagens/alquimista/frente.png"
+    }
   }
 ]

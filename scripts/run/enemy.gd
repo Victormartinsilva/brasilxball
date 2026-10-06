@@ -37,6 +37,14 @@ var gravity_slow := 0.0
 var shoot_timer := 0.0
 var melee_timer := 0.0       # preparo do ataque corpo a corpo (olho gordo)
 var melee_cd := 0.0
+var contact_time := 0.0      # tempo com o jogador encostado (auto-explode em ~3,5s)
+var hop_from := 0.0          # avanço em casas: pula de hop_from para hop_to
+var hop_to := 0.0
+var hop_t := 1.0
+var skip_step := false       # lento (gelo/Saci): anda uma casa sim, outra não
+var leaping := false         # chegou ao fim: pula no jogador e explode
+var leap_from := Vector2.ZERO
+var leap_t := 0.0
 var _eye: Node3D
 var _label: Label3D
 var _model: Node3D
@@ -72,7 +80,10 @@ func _build_visual() -> void:
 	var color := Color(data["cor"])
 	if is_elite:
 		color = color.lerp(Color("#ffb02e"), 0.45)
-	_model = Models.build_enemy(data["modelo"], color, int(data.get("largura", 1)))
+	_model = Models.enemy_visual(data, color, int(data.get("largura", 1)))
+	var art := _model.get_node_or_null("Arte") as Sprite3D
+	if art and is_elite:
+		art.modulate = Color(1.25, 1.05, 0.55)  # elite: banho de ouro
 	add_child(_model)
 	if is_elite:
 		_model.scale = Vector3.ONE * 1.12
@@ -116,7 +127,7 @@ func _build_visual() -> void:
 	_label.outline_size = 14
 	_label.modulate = Color("#fff3d6")
 	_label.outline_modulate = Color("#120d08")
-	_label.position = Vector3(0, 1.45, 0)
+	_label.position = Vector3(0, 2.0, 0)
 	_label.render_priority = 5
 	_label.outline_render_priority = 4
 	add_child(_label)
@@ -131,7 +142,7 @@ func sync_visual() -> void:
 
 
 ## Aviso de ataque corpo a corpo: o "olho gordo" 👁 sobre o inimigo.
-func show_eye(on: bool) -> void:
+func show_eye(on: bool, fill := 0.0) -> void:
 	if on and _eye == null:
 		_eye = Node3D.new()
 		_eye.position = Vector3(0, 1.85, 0)
@@ -143,7 +154,9 @@ func show_eye(on: bool) -> void:
 	if _eye:
 		_eye.visible = on
 		if on:
-			_eye.scale = Vector3.ONE * (1.0 + sin(Time.get_ticks_msec() / 60.0) * 0.12)
+			# Quanto mais perto de explodir, maior e mais rápido o olho pulsa.
+			var pulse := sin(Time.get_ticks_msec() / lerpf(120.0, 35.0, fill)) * 0.15
+			_eye.scale = Vector3.ONE * (0.7 + fill * 0.7 + pulse)
 
 
 func punch() -> void:
@@ -153,6 +166,10 @@ func punch() -> void:
 func animate(delta: float) -> void:
 	_anim += delta
 	_punch = maxf(0.0, _punch - delta * 7.0)
+	if hop_t < 1.0:
+		hop_t = minf(1.0, hop_t + delta / 0.3)
+		pos.y = lerpf(hop_from, hop_to, ease(hop_t, 0.6))
+		position.y = sin(hop_t * PI) * 0.35
 	var s := 1.0 + _punch * 0.18
 	_model.scale = Vector3(s, 1.0 / s, s) * (1.12 if is_elite else 1.0)
 	if frozen_time > 0.0:

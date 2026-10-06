@@ -27,6 +27,7 @@ var is_clone := false
 var lifetime := 25.0          # segurança: se ficar presa, volta sozinha
 var bag_id := ""             # "" = bola temporária (clone, rajada…); senão volta para a bolsa
 var suspiro_done := false
+var rolling := false         # chegou ao fundo: rola de volta até o jogador (nunca se perde)
 var last_hit_id := 0
 var last_hit_time := -1.0
 var hit_ids: Dictionary = {}  # para bolas que atravessam (fantasma/bumerangue de volta)

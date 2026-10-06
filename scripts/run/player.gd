@@ -3,7 +3,7 @@ extends Node3D
 ## O personagem na base da arena. Move só no eixo X (2D), mira com o mouse ou automaticamente.
 
 const Y := 0.35
-const Y_MAX := 3.2          # faixa de defesa: o personagem anda em X e Y
+const Y_MAX := 4.5          # faixa de defesa: o personagem anda em X e Y (frente, trás, lados)
 const LIMIT := 5.55
 
 var char_data: Dictionary
@@ -25,7 +25,7 @@ var _last_x := 0.0
 func setup(character: Dictionary) -> void:
 	char_data = character
 	move_speed = float(character["velocidade"])
-	_model = Models.build_character(character["id"])
+	_model = Models.character_visual(character)
 	add_child(_model)
 	var shadow := MeshInstance3D.new()
 	var cm := CylinderMesh.new()

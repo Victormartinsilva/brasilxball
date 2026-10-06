@@ -130,6 +130,49 @@ static func _add(parent: Node3D, mesh: Mesh, material: Material, pos: Vector3) -
 	return mi
 
 
+# ---------------------------------------------------------------- ARTE 2D (miniaturas)
+
+## Sprite "miniatura" a partir de uma arte recortada (tools/recortar_arte.py).
+## A arte já vem na vista 3/4 de cima, então fica de frente para a câmera (billboard).
+## `width` é a largura em unidades de jogo; a base de calçada fica centrada na origem.
+static func art_sprite(path: String, width: float) -> Sprite3D:
+	if path == "" or not ResourceLoader.exists(path):
+		return null
+	var tex: Texture2D = load(path)
+	var s := Sprite3D.new()
+	s.name = "Arte"
+	s.texture = tex
+	s.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	s.shaded = false
+	s.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
+	s.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	s.pixel_size = width / float(tex.get_width())
+	s.offset = Vector2(0, tex.get_height() * 0.5 - tex.get_height() * 0.14)
+	return s
+
+
+## Visual de inimigo: usa a arte se existir; senão o modelo procedural provisório.
+static func enemy_visual(data: Dictionary, color: Color, width: int) -> Node3D:
+	var spr := art_sprite(String(data.get("arte", "")), float(width) * 1.4)
+	if spr:
+		var root := Node3D.new()
+		root.add_child(spr)
+		return root
+	return build_enemy(data["modelo"], color, width)
+
+
+## Visual do personagem na arena (arte "jogo") ou modelo procedural.
+static func character_visual(char_data: Dictionary, width := 2.3) -> Node3D:
+	var arte: Dictionary = char_data.get("arte", {})
+	var spr := art_sprite(String(arte.get("jogo", "")), width)
+	if spr:
+		var root := Node3D.new()
+		root.name = "Modelo"
+		root.add_child(spr)
+		return root
+	return build_character(char_data["id"])
+
+
 # ---------------------------------------------------------------- PERSONAGENS
 
 static func build_character(id: String) -> Node3D:

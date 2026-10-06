@@ -148,6 +148,20 @@ static func place(c: Control, anchor: Vector2, offset: Vector2, size := Vector2.
 	c.grow_vertical = Control.GROW_DIRECTION_BEGIN if anchor.y >= 1.0 else (Control.GROW_DIRECTION_BOTH if anchor.y > 0.0 else Control.GROW_DIRECTION_END)
 
 
+## Retrato de personagem a partir da arte (ou ícone circular se não houver arte).
+static func portrait(char_data: Dictionary, size: float) -> Control:
+	var path := String(char_data.get("arte", {}).get("retrato", ""))
+	if path != "" and ResourceLoader.exists(path):
+		var t := TextureRect.new()
+		t.texture = load(path)
+		t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		t.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		t.custom_minimum_size = Vector2(size, size)
+		t.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		return t
+	return icon(Color(char_data["cor"]), String(char_data["nome"]).substr(0, 1), size)
+
+
 static func format_time(t: float) -> String:
 	var s := int(t)
 	return "%02d:%02d" % [s / 60, s % 60]

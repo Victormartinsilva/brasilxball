@@ -1,13 +1,13 @@
 class_name Backdrop
 extends Node3D
-## Fundo vivo dos menus: a maquete da Paulista com câmera orbitando e os três heróis na faixa de pedestres.
+## Fundo vivo dos menus: a boca da Grota Funda (Mata Atlântica) com câmera orbitando e os três heróis na cerca da vila.
 
 var _cam: Camera3D
 var _t := 0.0
 
 
 func _ready() -> void:
-	add_child(DioramaSaoPaulo.new())
+	add_child(DioramaMataAtlantica.new())
 	var ids := ["guardiao", "cacadora", "alquimista"]
 	for i in ids.size():
 		var m := Models.character_visual(GameData.characters[ids[i]])
@@ -16,7 +16,7 @@ func _ready() -> void:
 	# Alguns inimigos parados ao fundo, como uma "foto" da batalha.
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
-	var models := ["pombo", "drone", "robo", "concreto", "pombo", "drone"]
+	var models := ["vagalume", "macaco", "tatu", "toco", "vagalume", "macaco"]
 	for i in 14:
 		var id: String = models[rng.randi() % models.size()]
 		var data: Dictionary = GameData.enemies.get(id, GameData.enemies["pombo"])

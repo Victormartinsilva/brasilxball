@@ -175,7 +175,7 @@ func animate(delta: float) -> void:
 	if frozen_time > 0.0:
 		return
 	match data["modelo"]:
-		"pombo":
+		"pombo", "vagalume":
 			var flap := sin(_anim * 14.0) * 0.6
 			var wl := _model.get_node_or_null("AsaE")
 			var wr := _model.get_node_or_null("AsaD")

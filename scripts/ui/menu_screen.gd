@@ -25,9 +25,9 @@ func _ready() -> void:
 
 	_col = UIKit.vbox(14)
 	_root.add_child(_col)
-	_title = UIKit.label("BALL\nx BRASIL", 92, UIKit.GOLD, 16)
+	_title = UIKit.label("GROTA\nFUNDA", 92, UIKit.GOLD, 16)
 	_col.add_child(_title)
-	_sub = UIKit.label("Quebre. Ricocheteie. Evolua.\nConquiste o Brasil.", 24, UIKit.CREAM, 5)
+	_sub = UIKit.label("A bola sagrada caiu na grota.\nDesça e traga ela de volta.", 24, UIKit.CREAM, 5)
 	_col.add_child(_sub)
 	var spacer := Control.new()
 	spacer.custom_minimum_size.y = 24
@@ -46,7 +46,7 @@ func _ready() -> void:
 	if OS.has_feature("web") and GameData.is_mobile():
 		_col.add_child(UIKit.button("Tela cheia", _fullscreen, 22))
 
-	var ver := UIKit.label("Protótipo v0.2 — Vertical slice: São Paulo", 15, UIKit.MUTED, 3)
+	var ver := UIKit.label("Protótipo v0.3 — Bioma 1: Mata Atlântica", 15, UIKit.MUTED, 3)
 	UIKit.place(ver, Vector2(0, 1), Vector2(20, -36))
 	_root.add_child(ver)
 
@@ -94,7 +94,7 @@ func _build_help() -> void:
 	hv.add_child(UIKit.label("COMO JOGAR", 30, UIKit.GOLD, 6))
 	for line in [
 		"As bolas são disparadas sozinhas e ricocheteiam nas paredes e nos inimigos.",
-		"Não deixe os inimigos chegarem à faixa de pedestres!",
+		"Não deixe as assombrações chegarem à cerca da vila!",
 		"Colete gemas para subir de nível e escolher 1 de 3 melhorias.",
 		"Duas bolas no nível 3 podem virar uma FUSÃO.",
 		"",

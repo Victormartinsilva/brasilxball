@@ -282,6 +282,51 @@ static func build_enemy(model: String, color: Color, width: int) -> Node3D:
 			sphere(root, 0.06, Color("#ff9f2e"), Vector3(-0.1, 1.0, -0.26), 3.0, false)
 			sphere(root, 0.06, Color("#ff9f2e"), Vector3(0.12, 1.0, -0.26), 3.0, false)
 			box(root, Vector3(0.05, 0.4, 0.02), Color("#c9a26a"), Vector3(0.2, 0.5, -0.36), 0.0, false)  # vergalhão
+		"vagalume":
+			var body := sphere(root, 0.18, Color("#3b3020"), Vector3(0, 0.62, 0))
+			body.scale = Vector3(1, 0.8, 1.4)
+			sphere(root, 0.2, color, Vector3(0, 0.55, 0.22), 4.0, false)  # lanterninha
+			var wl := box(root, Vector3(0.36, 0.03, 0.18), Color(1, 1, 1, 0.8), Vector3(-0.22, 0.72, -0.05), 0.0, false)
+			wl.name = "AsaE"
+			var wr := box(root, Vector3(0.36, 0.03, 0.18), Color(1, 1, 1, 0.8), Vector3(0.22, 0.72, -0.05), 0.0, false)
+			wr.name = "AsaD"
+			sphere(root, 0.05, Color("#ff9f2e"), Vector3(0.07, 0.68, -0.22), 2.0, false)
+			sphere(root, 0.05, Color("#ff9f2e"), Vector3(-0.07, 0.68, -0.22), 2.0, false)
+		"macaco":
+			capsule(root, 0.24, 0.6, color, Vector3(0, 0.45, 0))
+			sphere(root, 0.2, color, Vector3(0, 0.9, -0.05))
+			sphere(root, 0.13, Color("#d9b48a"), Vector3(0, 0.86, -0.18))  # cara clara
+			sphere(root, 0.05, Color("#120d08"), Vector3(0.06, 0.92, -0.27), 0.0, false)
+			sphere(root, 0.05, Color("#120d08"), Vector3(-0.06, 0.92, -0.27), 0.0, false)
+			box(root, Vector3(0.36, 0.1, 0.28), Color("#2a1d14"), Vector3(0, 1.08, 0))  # topete de prego
+			var tail := cylinder(root, 0.04, 0.05, 0.7, color, Vector3(0, 0.45, 0.35))
+			tail.rotation_degrees = Vector3(55, 0, 0)
+			sphere(root, 0.12, Color("#c98a3a"), Vector3(0.28, 0.65, -0.15))  # coquinho
+		"tatu":
+			var shell := sphere(root, 0.42, color, Vector3(0, 0.35, 0))
+			shell.scale = Vector3(1.0, 0.75, 1.25)
+			for k in 4:
+				box(root, Vector3(0.86, 0.05, 0.06), color.darkened(0.3), Vector3(0, 0.55 - absf(k - 1.5) * 0.05, -0.3 + k * 0.2), 0.0, false)
+			sphere(root, 0.12, Color("#c9a882"), Vector3(0, 0.3, -0.5))
+			cylinder(root, 0.0, 0.06, 0.2, Color("#c9a882"), Vector3(0, 0.3, -0.66)).rotation_degrees = Vector3(-90, 0, 0)
+			sphere(root, 0.04, Color("#ff3d1f"), Vector3(0.06, 0.36, -0.58), 2.5, false)
+		"cupinzeiro":
+			var w2 := float(width) * 0.8
+			for k in 3:
+				var mound := sphere(root, 0.5 - k * 0.12, color.darkened(k * 0.08), Vector3((k - 1) * 0.42, 0.35 + (1 - absf(k - 1)) * 0.25, 0))
+				mound.scale = Vector3(1.1, 1.4, 1.0)
+			box(root, Vector3(w2, 0.18, 0.6), color.darkened(0.2), Vector3(0, 0.1, 0))
+			for k in 4:
+				sphere(root, 0.05, Color("#ffd23d"), Vector3(-0.6 + k * 0.4, 0.5 + (k % 2) * 0.3, -0.42), 3.0, false)
+		"toco":
+			cylinder(root, 0.36, 0.44, 0.85, color, Vector3(0, 0.42, 0))
+			cylinder(root, 0.33, 0.33, 0.04, Color("#c9a26a"), Vector3(0, 0.86, 0), 0.0, false)  # anéis
+			for sx in [-1, 1]:
+				var root_b := box(root, Vector3(0.14, 0.12, 0.5), color.darkened(0.15), Vector3(sx * 0.35, 0.06, 0.1))
+				root_b.rotation_degrees = Vector3(0, sx * 35, 0)
+			box(root, Vector3(0.4, 0.08, 0.4), Color("#4c7a3a"), Vector3(0.05, 0.9, 0.05), 0.0, false)  # musgo
+			sphere(root, 0.06, Color("#9dff6a"), Vector3(-0.12, 0.6, -0.36), 3.0, false)
+			sphere(root, 0.06, Color("#9dff6a"), Vector3(0.12, 0.6, -0.36), 3.0, false)
 		_:
 			box(root, Vector3(0.7, 0.7, 0.7), color, Vector3(0, 0.4, 0))
 	# Modelos são montados de "frente" para -Z; inimigos olham para o jogador (+Z).
@@ -320,6 +365,38 @@ static func build_skyscraper() -> Node3D:
 		root.add_child(arm)
 		box(arm, Vector3(0.45, 0.45, 3.2), Color("#e8b04a"), Vector3(0, 0, 1.4))
 		box(arm, Vector3(0.8, 0.8, 0.8), Color("#3a3f47"), Vector3(0, 0, 3.1))
+	return root
+
+
+## Chefe da Mata Atlântica: a Mula sem Cabeça (fogo no lugar da cabeça). Frente para +Z? Não: corre de lado (eixo X).
+static func build_mula() -> Node3D:
+	var root := Node3D.new()
+	var coat := Color("#3b2416")
+	var body := capsule(root, 0.75, 3.0, coat, Vector3(0, 1.7, 0))
+	body.rotation_degrees = Vector3(0, 0, 90)
+	box(root, Vector3(1.3, 0.25, 1.4), Color("#7a2e1d"), Vector3(-0.1, 2.45, 0))  # sela
+	box(root, Vector3(0.6, 0.15, 1.5), Color("#e8b04a"), Vector3(-0.1, 2.32, 0), 0.5, false)
+	for lx in [-0.9, 0.9]:
+		for lz in [-0.45, 0.45]:
+			var leg := Node3D.new()
+			leg.name = "Perna"
+			leg.position = Vector3(lx, 1.2, lz)
+			root.add_child(leg)
+			cylinder(leg, 0.13, 0.16, 1.2, coat, Vector3(0, -0.6, 0))
+			cylinder(leg, 0.18, 0.18, 0.12, Color("#c9a26a"), Vector3(0, -1.2, 0))  # ferradura
+	var neck := cylinder(root, 0.35, 0.45, 0.9, coat, Vector3(1.75, 2.25, 0))
+	neck.rotation_degrees = Vector3(0, 0, -40)
+	# Fogo onde devia haver cabeça.
+	var fire := Node3D.new()
+	fire.name = "Fogo"
+	fire.position = Vector3(2.15, 2.85, 0)
+	root.add_child(fire)
+	for k in 5:
+		var f := cylinder(fire, 0.0, 0.32 - k * 0.04, 0.8 + k * 0.15, [Color("#ffe14a"), Color("#ff9f2e"), Color("#ff3d1f")][k % 3],
+			Vector3(randf_range(-0.12, 0.12), 0.35 + k * 0.08, randf_range(-0.12, 0.12)), 4.0, false)
+		f.name = "Chama%d" % k
+	var tail := cylinder(root, 0.05, 0.14, 1.1, Color("#1d1110"), Vector3(-1.9, 1.7, 0))
+	tail.rotation_degrees = Vector3(0, 0, -50)
 	return root
 
 

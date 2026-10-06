@@ -12,7 +12,7 @@ Legenda: ✅ implementado · 🟡 parcial · ⏳ pendente · ❓ decisão em abe
 | Personagem anda na faixa de defesa (X **e** Y) | ✅ faixa y 0,35–3,2 | `player.gd` |
 | Paredes laterais e teto rebatem | ✅ | `_ball_walls` |
 | Câmera fixa | ✅ (só recua na entrada do chefe) | |
-| Modificador de campo por bioma | 🟡 São Paulo tem trânsito; biomas ⏳ | `_update_traffic` |
+| Modificador de campo por bioma | ✅ Mata Atlântica: Cipós · São Paulo (bônus): trânsito · demais biomas ⏳ | `_update_traffic` |
 
 ## 2. Ciclo de vida da bola
 
@@ -59,7 +59,7 @@ Legenda: ✅ implementado · 🟡 parcial · ⏳ pendente · ❓ decisão em abe
 | **Tirar na Sorte** com custo crescente | ✅ grátis com Patuás do Arsenal, depois 5, 10, 15… de sucata |
 | Patuá com Benzer / Misturar / Encantar | ❓ conflita com o glossário do GDD-03 (Repique / Mistura / Receita) |
 | Mandar pro Banco (banir opção) | ✅ cargas vêm da Casa da Rezadeira (Arsenal) |
-| Chefe do folclore | ❓ hoje o chefe é O Arranha-Céu (São Paulo) |
+| Chefe do folclore | ✅ A Mula sem Cabeça (Mata Atlântica) — ver [bioma 1](biomas/01-MATA-ATLANTICA.md) |
 
 ## 6. Fora da partida
 
@@ -73,7 +73,7 @@ Legenda: ✅ implementado · 🟡 parcial · ⏳ pendente · ❓ decisão em abe
 
 ## Decisões em aberto (precisam de Victor e Isa)
 
-1. **Premissa:** "Ball x Brasil" com São Paulo/Arranha-Céu **ou** "Grota Funda" com biomas e chefes do folclore? (Dá para ter os dois: Grota como campanha principal e cidades como fases bônus.)
+1. ~~Premissa~~ **Decidido: Grota Funda**, começando pela Mata Atlântica; São Paulo vira fase bônus.
 2. **Glossário:** Repique/Mistura/Receita (GDD-03) **ou** Patuá com Benzer/Misturar/Encantar?
 3. **Base:** manter o Acampamento ou migrar para a Vila com Mutirão?
 4. **Nível máximo da bola:** GDD-03 diz 1–3; o protótipo usa 1–5 (receita exige nível 3).

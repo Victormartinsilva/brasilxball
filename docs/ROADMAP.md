@@ -44,7 +44,10 @@ Legenda: ✅ feito no protótipo · 🟡 parcial · ⏳ pendente
 - ✅ Mapa do Brasil (árvore de progressão; demais regiões "em breve")
 - ⏳ Mercado (troca de recursos)
 
-## Fase 6 — Conteúdo
+## Fase 6 — Conteúdo (Grota Funda)
+
+- ✅ Bioma 1: Mata Atlântica — cenário, 5 tropas, Cipós, chefe A Mula sem Cabeça
+- ⏳ Cerrado · Caatinga · Pantanal · Pampa · Amazônia (fase final, Mapinguari)
 
 - ⏳ Rio de Janeiro (Ondas) · Cataratas (Correnteza) · Amazônia (Vegetação) · Nordeste (Calor) · Pantanal (Água variável) · Minas (Mineração)
 

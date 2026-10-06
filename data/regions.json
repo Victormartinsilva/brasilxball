@@ -1,32 +1,246 @@
 [
   {
+    "id": "mata_atlantica",
+    "nome": "Mata Atlântica",
+    "subtitulo": "A boca da grota: mata fechada, pedra e cachoeira",
+    "jogavel": true,
+    "recurso": "Madeira",
+    "cenario": "mata_atlantica",
+    "tempo_chefe": 300,
+    "eventos_feira": [
+      100,
+      210
+    ],
+    "velocidade_descida": [
+      0.24,
+      0.42
+    ],
+    "preenchimento": [
+      0.38,
+      0.78
+    ],
+    "escala_hp": [
+      1.0,
+      3.6
+    ],
+    "chance_elite": 0.035,
+    "fases": [
+      {
+        "t": 0,
+        "pool": {
+          "vagalume": 5,
+          "macaco": 2
+        }
+      },
+      {
+        "t": 45,
+        "pool": {
+          "vagalume": 3,
+          "macaco": 3,
+          "tatu": 3
+        }
+      },
+      {
+        "t": 100,
+        "pool": {
+          "vagalume": 2,
+          "macaco": 3,
+          "tatu": 3,
+          "cupinzeiro": 1
+        }
+      },
+      {
+        "t": 160,
+        "pool": {
+          "vagalume": 2,
+          "macaco": 3,
+          "tatu": 3,
+          "cupinzeiro": 2,
+          "toco": 1
+        }
+      },
+      {
+        "t": 230,
+        "pool": {
+          "vagalume": 1,
+          "macaco": 3,
+          "tatu": 3,
+          "cupinzeiro": 2,
+          "toco": 3
+        }
+      }
+    ],
+    "cipos": {
+      "inicio": 40,
+      "intervalo": [
+        11,
+        6
+      ],
+      "vida": 9
+    },
+    "invocacao": {
+      "vagalume": 3,
+      "macaco": 2
+    },
+    "feira": {
+      "titulo": "FEIRA DA ROÇA",
+      "texto": "Um mascate desceu a grota com relíquias. Escolha uma."
+    },
+    "chefe": {
+      "id": "mula_sem_cabeca",
+      "nome": "A Mula sem Cabeça",
+      "hp": 8000,
+      "fala": "Um tropel no escuro... e fogo onde devia haver cabeça."
+    },
+    "vitoria": "A Mula sossegou. A mata respira — e a grota continua lá embaixo.",
+    "mapa": {
+      "x": 0.74,
+      "y": 0.62
+    }
+  },
+  {
+    "id": "cerrado",
+    "nome": "Cerrado",
+    "subtitulo": "Chapadas, veredas e buritis",
+    "jogavel": false,
+    "recurso": "Pequi",
+    "mapa": {
+      "x": 0.52,
+      "y": 0.52
+    }
+  },
+  {
+    "id": "caatinga",
+    "nome": "Caatinga / Sertão",
+    "subtitulo": "Cactos que rebatem em ângulo torto",
+    "jogavel": false,
+    "recurso": "Barro",
+    "mapa": {
+      "x": 0.78,
+      "y": 0.34
+    }
+  },
+  {
+    "id": "pantanal",
+    "nome": "Pantanal",
+    "subtitulo": "Poças que desaceleram as bolas",
+    "jogavel": false,
+    "recurso": "Lodo",
+    "mapa": {
+      "x": 0.4,
+      "y": 0.62
+    }
+  },
+  {
+    "id": "pampa",
+    "nome": "Pampa",
+    "subtitulo": "Minuano e coxilhas sem fim",
+    "jogavel": false,
+    "recurso": "Couro",
+    "mapa": {
+      "x": 0.48,
+      "y": 0.9
+    }
+  },
+  {
+    "id": "amazonia",
+    "nome": "Amazônia",
+    "subtitulo": "O fundo da grota — fase final",
+    "jogavel": false,
+    "recurso": "Essência",
+    "mapa": {
+      "x": 0.36,
+      "y": 0.22
+    }
+  },
+  {
     "id": "sao_paulo",
     "nome": "São Paulo",
-    "subtitulo": "Avenida Paulista Fantástica",
+    "subtitulo": "Cidade grande — fase bônus",
     "jogavel": true,
     "recurso": "Sucata",
     "tempo_chefe": 300,
-    "eventos_feira": [100, 210],
-    "velocidade_descida": [0.24, 0.42],
-    "preenchimento": [0.38, 0.78],
-    "escala_hp": [1.0, 3.6],
+    "eventos_feira": [
+      100,
+      210
+    ],
+    "velocidade_descida": [
+      0.24,
+      0.42
+    ],
+    "preenchimento": [
+      0.38,
+      0.78
+    ],
+    "escala_hp": [
+      1.0,
+      3.6
+    ],
     "chance_elite": 0.035,
     "fases": [
-      {"t": 0,   "pool": {"pombo": 5, "drone": 2}},
-      {"t": 45,  "pool": {"pombo": 3, "drone": 3, "robo": 3}},
-      {"t": 100, "pool": {"pombo": 2, "drone": 3, "robo": 3, "fusca": 1}},
-      {"t": 160, "pool": {"pombo": 2, "drone": 3, "robo": 3, "fusca": 2, "concreto": 1}},
-      {"t": 230, "pool": {"pombo": 1, "drone": 3, "robo": 3, "fusca": 2, "concreto": 3}}
+      {
+        "t": 0,
+        "pool": {
+          "pombo": 5,
+          "drone": 2
+        }
+      },
+      {
+        "t": 45,
+        "pool": {
+          "pombo": 3,
+          "drone": 3,
+          "robo": 3
+        }
+      },
+      {
+        "t": 100,
+        "pool": {
+          "pombo": 2,
+          "drone": 3,
+          "robo": 3,
+          "fusca": 1
+        }
+      },
+      {
+        "t": 160,
+        "pool": {
+          "pombo": 2,
+          "drone": 3,
+          "robo": 3,
+          "fusca": 2,
+          "concreto": 1
+        }
+      },
+      {
+        "t": 230,
+        "pool": {
+          "pombo": 1,
+          "drone": 3,
+          "robo": 3,
+          "fusca": 2,
+          "concreto": 3
+        }
+      }
     ],
-    "transito": {"inicio": 60, "intervalo": [9, 5], "faixa_y": 5.5},
-    "chefe": {"id": "arranha_ceu", "nome": "O Arranha-Céu", "hp": 13000,
-      "fala": "Você realmente achou que isso aqui era visita turística?"},
-    "mapa": {"x": 0.62, "y": 0.70}
-  },
-  {"id": "rio", "nome": "Rio de Janeiro", "subtitulo": "Cidade + morro + praia", "jogavel": false, "recurso": "Areia", "mapa": {"x": 0.72, "y": 0.78}},
-  {"id": "iguacu", "nome": "Cataratas do Iguaçu", "subtitulo": "Água + natureza + força", "jogavel": false, "recurso": "Névoa", "mapa": {"x": 0.45, "y": 0.86}},
-  {"id": "minas", "nome": "Minas Gerais", "subtitulo": "Montanhas + minas", "jogavel": false, "recurso": "Minério", "mapa": {"x": 0.66, "y": 0.60}},
-  {"id": "pantanal", "nome": "Pantanal", "subtitulo": "Águas que sobem e descem", "jogavel": false, "recurso": "Lodo", "mapa": {"x": 0.42, "y": 0.62}},
-  {"id": "nordeste", "nome": "Nordeste", "subtitulo": "Sertão + litoral", "jogavel": false, "recurso": "Relíquia", "mapa": {"x": 0.80, "y": 0.32}},
-  {"id": "amazonia", "nome": "Amazônia", "subtitulo": "Floresta + mistério", "jogavel": false, "recurso": "Essência", "mapa": {"x": 0.38, "y": 0.22}}
+    "transito": {
+      "inicio": 60,
+      "intervalo": [
+        9,
+        5
+      ],
+      "faixa_y": 5.5
+    },
+    "chefe": {
+      "id": "arranha_ceu",
+      "nome": "O Arranha-Céu",
+      "hp": 13000,
+      "fala": "Você realmente achou que isso aqui era visita turística?"
+    },
+    "mapa": {
+      "x": 0.7,
+      "y": 0.72
+    },
+    "bonus": true
+  }
 ]

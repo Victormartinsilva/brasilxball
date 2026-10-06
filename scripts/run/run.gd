@@ -48,7 +48,7 @@ var projectiles: Array = []  # {node, pos, vel, dmg}
 var shards: Array = []       # {warn, pos, timer}
 var fields: Array = []       # {node, pos, radius, timer, dps, freeze, tick}
 var cars: Array = []         # {node, pos, half, vel}
-var boss: BossArranhaCeu
+var boss: BossBase
 
 var time := 0.0
 var hp := 100.0
@@ -116,7 +116,7 @@ func _ready() -> void:
 	hp = max_hp
 	xp_next = _xp_needed(1)
 
-	diorama = DioramaSaoPaulo.new()
+	diorama = DioramaMataAtlantica.new() if region.get("cenario", "") == "mata_atlantica" else DioramaSaoPaulo.new()
 	add_child(diorama)
 	misc_root = Node3D.new()
 	add_child(misc_root)
@@ -288,9 +288,8 @@ func _update_aim(delta: float) -> void:
 
 func _auto_target() -> Vector2:
 	# Mira no inimigo mais próximo da base (a maior ameaça); chefe tem prioridade nas janelas.
-	if boss and not boss.dead and not boss.intro and boss.open_windows.size() > 0:
-		var wx: float = BossArranhaCeu.WINDOW_X[boss.open_windows[0]]
-		return Vector2(boss.pos.x + wx, boss.pos.y - boss.half.y)
+	if boss and not boss.dead and not boss.intro and absf(boss.pos.x) < ARENA_W:
+		return boss.auto_target_point()
 	var best: Enemy = null
 	for e: Enemy in enemies:
 		if e.dead:
@@ -1372,16 +1371,51 @@ func _update_traffic(delta: float) -> void:
 			var iv: Array = tr["intervalo"]
 			traffic_timer = lerpf(iv[0], iv[1], difficulty()) * (0.6 if boss and boss.phase == 2 else 1.0)
 			_spawn_car(float(tr["faixa_y"]))
+	var cp: Dictionary = region.get("cipos", {})
+	if not cp.is_empty() and time > float(cp["inicio"]):
+		traffic_timer -= delta
+		if traffic_timer <= 0.0:
+			var iv2: Array = cp["intervalo"]
+			traffic_timer = lerpf(iv2[0], iv2[1], difficulty())
+			_spawn_cipo(float(cp.get("vida", 9.0)))
 	var i := cars.size() - 1
 	while i >= 0:
 		var c: Dictionary = cars[i]
 		c["pos"] += c["vel"] * delta
 		var node: Node3D = c["node"]
 		node.position = FxLayer.to3(c["pos"], 0.0)
-		if absf(c["pos"].x) > 11.0:
+		var expired := false
+		if c.has("life"):
+			c["life"] -= delta
+			var grow := clampf((float(c["max"]) - float(c["life"])) * 3.0, 0.0, 1.0) * clampf(float(c["life"]) * 2.0, 0.0, 1.0)
+			node.scale = Vector3(1.0, maxf(grow, 0.05), 1.0)
+			expired = c["life"] <= 0.0
+		if absf(c["pos"].x) > 11.0 or expired:
 			node.queue_free()
 			cars.remove_at(i)
 		i -= 1
+
+
+## Mata Atlântica: cipós brotam atravessando algumas casas e rebatem as bolas (depois murcham).
+func _spawn_cipo(life: float) -> void:
+	var cells := rng.randi_range(3, 5)
+	var start_col := rng.randi_range(0, COLS - cells)
+	var row := SPAWN_Y - float(rng.randi_range(4, 11))
+	var cx := -5.0 + start_col + (cells - 1) * 0.5
+	var node := Node3D.new()
+	misc_root.add_child(node)
+	var w := float(cells)
+	var vine := Models.cylinder(node, 0.09, 0.09, w, Color("#3d6b2a"), Vector3(0, 0.5, 0))
+	vine.rotation_degrees = Vector3(0, 0, 90)
+	for k in cells * 2:
+		var leaf := Models.box(node, Vector3(0.28, 0.03, 0.16), Color("#5f9a3a"), Vector3(-w * 0.5 + 0.25 + k * 0.5, 0.55 + (k % 2) * 0.12, 0.05 * (1 - 2 * (k % 2))))
+		leaf.rotation_degrees = Vector3(0, 30 * (1 - 2 * (k % 2)), 20)
+	for sx in [-1, 1]:
+		Models.cylinder(node, 0.05, 0.05, 1.0, Color("#3d6b2a"), Vector3(sx * w * 0.5, 0.5, 0))
+	var at := Vector2(cx, row)
+	node.position = FxLayer.to3(at, 0.0)
+	cars.append({"node": node, "pos": at, "half": Vector2(w * 0.5, 0.18), "vel": Vector2.ZERO, "life": life, "max": life})
+	fx.sparks(at, Color("#5f9a3a"), 8, 3.0)
 
 
 func _spawn_car(lane_y: float) -> void:
@@ -1495,7 +1529,8 @@ func _check_events() -> void:
 				continue
 			offers.append({"tipo": "cura", "id": "cura", "nome": "Pastel de Feira", "descricao": "Recupera 30 de vida. Com caldo de cana.",
 				"raridade": "comum", "cor": Color("#e8b04a"), "nivel": 0, "tags": []})
-			levelup.open_choice("FEIRA DA PAULISTA", "Um mercador oferece relíquias. Escolha uma.", offers, build, "feira")
+			var feira: Dictionary = region.get("feira", {"titulo": "FEIRA DA PAULISTA", "texto": "Um mercador oferece relíquias. Escolha uma."})
+			levelup.open_choice(feira["titulo"], feira["texto"], offers, build, "feira")
 			return
 
 
@@ -1503,13 +1538,13 @@ func _start_boss() -> void:
 	boss_spawned = true
 	Sfx.play("chefe", 0.0)
 	var info: Dictionary = region["chefe"]
-	boss = BossArranhaCeu.new()
+	boss = BossMula.new() if info["id"] == "mula_sem_cabeca" else BossArranhaCeu.new()
 	enemies_root.add_child(boss)
 	boss.setup_boss(info, self, float(info["hp"]))
 	enemies.append(boss)
-	# A chegada do prédio esmaga quem estiver no caminho (vira XP).
+	# A chegada do chefe esmaga quem estiver no caminho (vira XP).
 	for e: Enemy in enemies:
-		if not e.dead and not e.is_boss and e.pos.y > boss._arrive_y - boss.half.y - 0.8:
+		if not e.dead and not e.is_boss and e.pos.y > boss.crush_line():
 			_kill(e)
 	hud.banner(String(info["nome"]).to_upper(), "\"%s\"" % info["fala"], 3.5)
 	_cam_offset_target = Vector3(0, 2.5, 2.0)
@@ -1518,14 +1553,17 @@ func _start_boss() -> void:
 
 
 func on_boss_phase(p: int) -> void:
-	hud.banner("FASE %d" % p, "Hora do rush! O prédio ficou nervoso.", 2.0)
+	var msg := "Hora do rush! O prédio ficou nervoso."
+	if boss is BossMula:
+		msg = "O tropel acelerou — e agora ela mira a vila!"
+	hud.banner("FASE %d" % p, msg, 2.0)
 	shake(0.3)
 
 
 func boss_summon(y: float) -> void:
 	# Alinha à grade de casas.
 	var row := SPAWN_Y - roundf(SPAWN_Y - clampf(y, 5.0, 14.0))
-	_spawn_row(row, 0.6, {"drone": 2, "pombo": 3})
+	_spawn_row(row, 0.6, region.get("invocacao", {"drone": 2, "pombo": 3}))
 
 
 func boss_glass_rain(count: int) -> void:
@@ -1554,7 +1592,7 @@ func _update_shards(delta: float) -> void:
 
 func _boss_defeated() -> void:
 	Sfx.play("vitoria", 0.0)
-	hud.banner("VITÓRIA!", "O Arranha-Céu desabou. São Paulo respira.", 3.0)
+	hud.banner("VITÓRIA!", String(region.get("vitoria", "O Arranha-Céu desabou. São Paulo respira.")), 3.0)
 	for k in 6:
 		fx.explosion(boss.pos + Vector2(rng.randf_range(-4, 4), rng.randf_range(-1, 1)), 2.5, Color("#ff9f2e"))
 	shake(0.8)
@@ -1571,10 +1609,13 @@ func damage_player(amount: float, src := "outro") -> void:
 		return
 	damage_taken[src] = float(damage_taken.get(src, 0.0)) + amount
 	hp -= amount
-	Sfx.play("dano", 0.1)
-	player.hurt_flash = 1.0
-	hud.flash_damage()
-	shake(0.25)
+	if amount >= 1.0:  # dano contínuo (fogo) não sacode a tela a cada quadro
+		Sfx.play("dano", 0.1)
+		player.hurt_flash = 1.0
+		hud.flash_damage()
+		shake(0.25)
+	else:
+		player.hurt_flash = maxf(player.hurt_flash, 0.3)
 	if hp <= 0.0:
 		hp = 0.0
 		Sfx.play("derrota", 0.0)

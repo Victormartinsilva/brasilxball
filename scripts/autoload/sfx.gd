@@ -3,7 +3,7 @@ extends Node
 ## Os arquivos ficam em assets/audio (gerados por tools/gerar_audio.py — troque pelo áudio final com o mesmo nome).
 
 const POOL := 12
-const MIN_GAP := {"ricochete": 0.05, "acerto": 0.035, "abate": 0.04, "gema": 0.05, "chute": 0.06, "explosao": 0.08}
+const MIN_GAP := {"dano": 0.3, "ricochete": 0.05, "acerto": 0.035, "abate": 0.04, "gema": 0.05, "chute": 0.06, "explosao": 0.08}
 const VOLUME_DB := {"musica_forro": -9.0, "ricochete": -10.0, "acerto": -8.0, "gema": -10.0, "abate": -6.0, "chute": -6.0}
 
 var _players: Array = []

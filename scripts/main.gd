@@ -18,7 +18,7 @@ func _ready() -> void:
 	goto_menu()
 
 
-## Atalhos de QA na versão web: ?teste=chefe&personagem=cacadora  |  ?teste=nivel
+## Atalhos de QA na versão web: ?teste=chefe&personagem=cacadora&regiao=sao_paulo  |  ?teste=nivel
 func _start_from_url() -> bool:
 	if not OS.has_feature("web"):
 		return false
@@ -35,7 +35,10 @@ func _start_from_url() -> bool:
 	var char_id: String = params.get("personagem", "alquimista")
 	if not GameData.characters.has(char_id):
 		char_id = "alquimista"
-	start_run(char_id, "sao_paulo")
+	var region_id: String = params.get("regiao", "mata_atlantica")
+	if not GameData.regions.has(region_id) or not GameData.regions[region_id].get("jogavel", false):
+		region_id = "mata_atlantica"
+	start_run(char_id, region_id)
 	var run := _screen as Run
 	match params["teste"]:
 		"chefe":
@@ -125,6 +128,9 @@ func _start_autotest(args: PackedStringArray) -> void:
 		char_id = args[i + 1]
 	if args.size() > i + 2:
 		limit = float(args[i + 2])
+	var region_id := "mata_atlantica"
+	if args.size() > i + 3 and GameData.regions.has(args[i + 3]):
+		region_id = args[i + 3]
 	# Libera todo o conteúdo para o teste exercitar o máximo de sistemas.
 	for id in GameData.balls:
 		if not Save.data["bolas"].has(id):
@@ -135,7 +141,7 @@ func _start_autotest(args: PackedStringArray) -> void:
 	for id in GameData.relics:
 		if not Save.data["reliquias"].has(id):
 			Save.data["reliquias"].append(id)
-	start_run(char_id, "sao_paulo")
+	start_run(char_id, region_id)
 	var run := _screen as Run
 	# Timeout de segurança (em tempo real).
 	get_tree().create_timer(limit, true, false, true).timeout.connect(func():

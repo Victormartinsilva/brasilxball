@@ -1,4 +1,6 @@
-# Ball x Brasil
+# Grota Funda (projeto Ball x Brasil)
+
+> **Premissa:** a bola sagrada da vila caiu na Grota Funda, uma fenda encantada que atravessa os biomas do Brasil. Primeiro bioma: **Mata Atlântica**, com a **Mula sem Cabeça**. São Paulo segue como fase bônus.
 
 > **Quebre. Ricocheteie. Evolua. Conquiste o Brasil.**
 > Roguelite brasileiro de ação, física e construção de builds — Breakout + Roguelite + Survivors, num Brasil fantástico em miniatura (2.5D).

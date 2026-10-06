@@ -9,7 +9,8 @@ var _root: Control
 var _sucata: Label
 var _tabs: TabContainer
 var _selected_char := "guardiao"
-var _selected_region := "sao_paulo"
+var _selected_region := "mata_atlantica"
+var _region_btn: Button
 var _char_cards: Dictionary = {}
 var _map: Control
 var _region_info: Label
@@ -94,8 +95,8 @@ func _build_expedition() -> void:
 	v.name = "Jogar"
 	_tabs.add_child(v)
 	var reg: Dictionary = GameData.regions[_selected_region]
-	var region_btn := UIKit.button("Região: %s  (ver mapa)" % reg["nome"], func(): _tabs.current_tab = 1, 18)
-	v.add_child(region_btn)
+	_region_btn = UIKit.button("Bioma: %s  (ver mapa)" % reg["nome"], func(): _tabs.current_tab = 1, 18)
+	v.add_child(_region_btn)
 	v.add_child(UIKit.label("ESCOLHA SEU PERSONAGEM", 22, UIKit.GOLD, 4))
 	var chips := UIKit.hbox(10)
 	v.add_child(chips)
@@ -208,8 +209,9 @@ func _draw_map() -> void:
 	outline.append(outline[0])
 	_map.draw_polyline(outline, UIKit.INK, 3.0)
 	var pts := _map_points()
-	var links := [["amazonia", "nordeste"], ["nordeste", "minas"], ["amazonia", "pantanal"], ["pantanal", "minas"],
-		["minas", "sao_paulo"], ["sao_paulo", "rio"], ["sao_paulo", "iguacu"]]
+	# A descida da grota: Mata Atlântica → Cerrado → Caatinga → Pantanal → Pampa → Amazônia (+ cidade bônus).
+	var links := [["mata_atlantica", "cerrado"], ["cerrado", "caatinga"], ["caatinga", "pantanal"], ["pantanal", "pampa"],
+		["pampa", "amazonia"], ["mata_atlantica", "sao_paulo"]]
 	for l in links:
 		if pts.has(l[0]) and pts.has(l[1]):
 			_map.draw_line(pts[l[0]], pts[l[1]], Color(UIKit.GOLD, 0.5), 3.0)
@@ -234,6 +236,8 @@ func _map_input(ev: InputEvent) -> void:
 		if ev.position.distance_to(pts[rid]) < 22.0:
 			if GameData.regions[rid].get("jogavel", false):
 				_selected_region = rid
+				if _region_btn:
+					_region_btn.text = "Bioma: %s  (ver mapa)" % GameData.regions[rid]["nome"]
 			_update_region_info(rid)
 			_map.queue_redraw()
 			return

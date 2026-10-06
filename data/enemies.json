@@ -81,5 +81,84 @@
       "pesado"
     ],
     "arte": "res://assets/inimigos/concreto/frente.png"
+  },
+  {
+    "id": "vagalume",
+    "nome": "Vaga-lume Errante",
+    "descricao": "Luzinha desgarrada da mata. Fraco, mas vem em enxame.",
+    "hp": 14,
+    "largura": 1,
+    "xp": 1,
+    "dano": 4,
+    "comportamento": "basico",
+    "modelo": "vagalume",
+    "cor": "#d9e86a",
+    "tags": [
+      "voador",
+      "mata"
+    ]
+  },
+  {
+    "id": "macaco",
+    "nome": "Macaco-Prego Arteiro",
+    "descricao": "Arremessa coquinhos em você de tempos em tempos.",
+    "hp": 22,
+    "largura": 1,
+    "xp": 1,
+    "dano": 6,
+    "comportamento": "atirador",
+    "modelo": "macaco",
+    "cor": "#6b4a2f",
+    "tags": [
+      "fauna",
+      "mata"
+    ]
+  },
+  {
+    "id": "tatu",
+    "nome": "Tatu Encouraçado",
+    "descricao": "A carapaça absorve o primeiro golpe.",
+    "hp": 40,
+    "largura": 1,
+    "xp": 2,
+    "dano": 8,
+    "comportamento": "blindado",
+    "modelo": "tatu",
+    "cor": "#9c8466",
+    "tags": [
+      "fauna",
+      "blindado"
+    ]
+  },
+  {
+    "id": "cupinzeiro",
+    "nome": "Cupinzeiro Vivo",
+    "descricao": "Ocupa duas casas. Estoura ao cair, ferindo os vizinhos.",
+    "hp": 85,
+    "largura": 2,
+    "xp": 4,
+    "dano": 14,
+    "comportamento": "explosivo",
+    "modelo": "cupinzeiro",
+    "cor": "#a8663a",
+    "tags": [
+      "terra"
+    ]
+  },
+  {
+    "id": "toco",
+    "nome": "Toco Assombrado",
+    "descricao": "Madeira dura de jequitibá: resiste a bolas leves; PESADAS racham.",
+    "hp": 130,
+    "largura": 1,
+    "xp": 5,
+    "dano": 18,
+    "comportamento": "concreto",
+    "modelo": "toco",
+    "cor": "#5a3d25",
+    "tags": [
+      "madeira",
+      "pesado"
+    ]
   }
 ]

@@ -1,34 +1,26 @@
 class_name BossArranhaCeu
-extends Enemy
+extends BossBase
 ## CHEFE DE SÃO PAULO — O Arranha-Céu.
 ## Teste de VELOCIDADE e PRECISÃO: só as janelas acesas da base (pontos fracos) recebem dano cheio.
 
 const WINDOW_X := [-3.2, -1.6, 0.0, 1.6, 3.2]
 const WINDOW_HALF := 0.6
 
-var run: Node                 # referência ao Run (para invocar ataques)
 var open_windows: Array = [1, 3]
-var phase := 1
-var intro := true
 var _window_timer := 3.0
 var _summon_timer := 6.0
 var _shard_timer := 3.0
 var _window_nodes: Array = []
 var _building: Node3D
-var _arrive_y := 13.6
 
 
 func setup_boss(boss_info: Dictionary, the_run: Node, hp_value: float) -> void:
-	run = the_run
-	is_boss = true
+	super.setup_boss(boss_info, the_run, hp_value)
 	id = boss_info["id"]
 	data = {"id": id, "nome": boss_info["nome"], "modelo": "arranha_ceu", "cor": "#4a5566", "comportamento": "chefe"}
 	behavior = "chefe"
-	max_hp = hp_value
-	hp = max_hp
-	xp = 60
-	contact_damage = 999.0
 	half = Vector2(4.0, 1.4)
+	arrive_y = 13.6
 	pos = Vector2(0, 26.0)
 	_build_boss_visual()
 	sync_visual()
@@ -43,18 +35,7 @@ func _build_boss_visual() -> void:
 	for i in WINDOW_X.size():
 		var w := Models.box(self, Vector3(1.2, 0.9, 0.12), Color("#ffd27a"), Vector3(WINDOW_X[i], 0.75, 1.58), 4.0, false)
 		_window_nodes.append(w)
-	_status = MeshInstance3D.new()
-	_status_mat = Models.fade_mat(Color.WHITE, 1.0)
-	add_child(_status)
-	_status.visible = false
-	_label = Label3D.new()
-	_label.visible = false
-	add_child(_label)
 	_refresh_windows()
-
-
-func sync_visual() -> void:
-	position = Vector3(pos.x, 0.0, -pos.y)
 
 
 func animate(delta: float) -> void:
@@ -73,9 +54,9 @@ func animate(delta: float) -> void:
 ## Chamado pelo Run a cada frame. Retorna true enquanto está na entrada (intro).
 func boss_update(delta: float) -> void:
 	if intro:
-		pos.y = move_toward(pos.y, _arrive_y, delta * 4.0)
+		pos.y = move_toward(pos.y, arrive_y, delta * 4.0)
 		sync_visual()
-		if is_equal_approx(pos.y, _arrive_y):
+		if is_equal_approx(pos.y, arrive_y):
 			intro = false
 		return
 	if phase == 1 and hp < max_hp * 0.5:
@@ -107,6 +88,12 @@ func _refresh_windows() -> void:
 		var open: bool = open_windows.has(i)
 		w.material_override = Models.mat(Color("#ffe14a") if open else Color("#2a3448"), 5.0 if open else 0.0, false)
 		w.scale = Vector3(1.0, 1.25 if open else 1.0, 1.0)
+
+
+func auto_target_point() -> Vector2:
+	if intro or open_windows.is_empty():
+		return pos
+	return Vector2(pos.x + WINDOW_X[open_windows[0]], pos.y - half.y)
 
 
 ## Multiplicador de dano conforme o ponto de contato (precisão!).

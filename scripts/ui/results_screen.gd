@@ -33,8 +33,9 @@ func _ready() -> void:
 	var title := UIKit.label("VITÓRIA!" if win else "FIM DA RUN", 52, UIKit.GOLD if win else UIKit.RED, 10)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(title)
-	var quote := "São Paulo agradece. O trânsito, nem tanto." if win else "Perdi a run, mas a próxima tentativa vai ser melhor."
-	var q := UIKit.label(quote, 18, UIKit.CREAM, 4)
+	var reg: Dictionary = GameData.regions.get(_result.get("regiao", ""), {})
+	var quote: String = String(reg.get("vitoria", "São Paulo agradece. O trânsito, nem tanto.")) if win else "Morrer não é o fim: cada descida deixa a vila mais forte."
+	var q := UIKit.wrap_label(quote, 18, UIKit.CREAM)
 	q.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(q)
 
